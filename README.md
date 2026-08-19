@@ -41,3 +41,7 @@ The model and the exercise are explained in these posts:
 - [Stop Answering the Wrong Question: Unlock Your True Work Happiness](https://blog.kindel.com/2025/02/05/stop-answering-the-wrong-question-unlock-your-true-work-happiness/) (Joy vs Drain; related, not this tool)
 - [Mental Models](https://blog.kindel.com/2019/06/22/mental-models/)
 - [Office Hours](https://kindel.com/officehours/)
+
+## License
+
+MIT. Copyright (c) 2026 Kindel, LLC. Keep the copyright notice and permission notice in all copies.
