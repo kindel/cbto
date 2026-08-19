@@ -27,7 +27,7 @@ Tig Kindel derived CBTO from J Allard's BXT (Business + eXperience + Technology)
 
 ## Status
 
-Coming soon. No live URL yet. This repo will be the app when it exists.
+Coming soon. The teaching page will live at https://kindel.com/cbto/. No app yet.
 
 ## Teaching
 

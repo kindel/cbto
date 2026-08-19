@@ -1,7 +1,8 @@
 {
   "id": "cbto",
   "name": "CBTO",
-  "href": "",
+  "subtitle": "Customer, Business, Technology, Organization",
+  "href": "/cbto/",
   "status": "later",
   "order": 70,
   "icon": "icon.png",
