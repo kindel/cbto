@@ -14,4 +14,4 @@ The tenets for this work live in the Tenets section of https://github.com/kindel
 
 SCHEMA.md is the contract. The data is data/index.json, data/facets.json, and data/<company>/<slug>.json. Do not fork a private copy of a set into this repo.
 
-CBTO-specific: coming-soon stack-rank tool (Customer, Business, Technology, Organization). No app code yet. Do not invent a wizard until asked.
+CBTO-specific: coming-soon stack-rank app (Customer, Business, Technology, Organization). No app code yet. Do not invent a wizard until asked.
