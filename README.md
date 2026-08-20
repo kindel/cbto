@@ -1,6 +1,6 @@
 # cbto
 
-A coming-soon interactive tool that walks you through the CBTO stack rank so you can see your superpowers, your growth edge, and whether your current energy matches where it should go. Also teaches the four-lens model.
+A coming-soon interactive app that walks you through the CBTO stack rank so you can see your superpowers, your growth edge, and whether your current energy matches where it should go. Also teaches the four-lens model.
 
 ## The Four Lenses
 
@@ -38,7 +38,7 @@ The model and the exercise are explained in these posts:
 
 ## Related
 
-- [Stop Answering the Wrong Question: Unlock Your True Work Happiness](https://blog.kindel.com/2025/02/05/stop-answering-the-wrong-question-unlock-your-true-work-happiness/) (Joy vs Drain; related, not this tool)
+- [Stop Answering the Wrong Question: Unlock Your True Work Happiness](https://blog.kindel.com/2025/02/05/stop-answering-the-wrong-question-unlock-your-true-work-happiness/) (Joy vs Drain; related, not this app)
 - [Mental Models](https://blog.kindel.com/2019/06/22/mental-models/)
 - [Office Hours](https://kindel.com/officehours/)
 
