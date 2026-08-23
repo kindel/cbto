@@ -160,6 +160,11 @@
     });
   }
 
+  function dropCapName(name) {
+    if (!name || name.length === 0) return esc(name);
+    return '<span class="cbto-letter">' + esc(name.charAt(0)) + '</span>' + esc(name.slice(1));
+  }
+
   function lensByLetter(ch) {
     for (var i = 0; i < lenses.length; i++) if (lenses[i].letter === ch) return lenses[i];
     return null;
@@ -249,7 +254,7 @@
       var heroLabel = heroVal ? "Gap to " + esc(heroVal) : "Someone who set your bar";
       html += '<li class="cbto-card cbto-lens-' + l.letter.toLowerCase() + '" draggable="true" data-letter="' + l.letter + '">' +
         '<span class="cbto-dot" aria-hidden="true"></span>' +
-        '<span class="cbto-card-body"><strong class="cbto-card-name">' + esc(l.name) + '</strong><span class="cbto-card-piep"> / ' + esc(piep(l)) + '</span>' +
+        '<span class="cbto-card-body"><strong class="cbto-card-name">' + dropCapName(l.name) + '</strong><span class="cbto-card-piep"> / ' + esc(piep(l)) + '</span>' +
         '<span class="cbto-card-def">' + esc(l.definition) + "</span>";
       if (isStrengths) {
         html += '<label class="cbto-hero-field"><span class="cbto-hero-label">' + heroLabel + "</span>" +
@@ -349,7 +354,7 @@
       var v = joySel[l.letter];
       html += '<div class="cbto-joy-row cbto-lens-' + l.letter.toLowerCase() + '" data-letter="' + l.letter + '">' +
         '<span class="cbto-dot" aria-hidden="true"></span>' +
-        '<span class="cbto-joy-name"><span class="cbto-joy-name-main">' + esc(l.name) + '</span><span class="cbto-joy-piep"> / ' + esc(piep(l)) + '</span></span>' +
+        '<span class="cbto-joy-name"><span class="cbto-joy-name-main">' + dropCapName(l.name) + '</span><span class="cbto-joy-piep"> / ' + esc(piep(l)) + '</span></span>' +
         '<span class="cbto-joy-buttons" role="group" aria-label="' + esc(l.name) + ': joy or drain">' +
         '<button type="button" class="cbto-joy-btn" data-v="joy" aria-pressed="' + (v === "joy") + '">Joy</button>' +
         '<button type="button" class="cbto-joy-btn" data-v="drain" aria-pressed="' + (v === "drain") + '">Drain</button>' +
