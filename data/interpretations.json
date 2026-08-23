@@ -1,0 +1,16 @@
+{
+  "superpower": "Your superpower is {lens}. It sits at the top of your strengths today. Own it. But notice how much of your week it already gets, because strengths pull energy toward themselves.",
+  "growth_edge": "Your growth edge is {lens}. You ranked it well above where it sits in your strengths today, and that gap is where intentional growth pays off.",
+  "growth_edge_none": "Your energy stack is identical to your strengths stack. You are planning to grow exactly where you are already strong. If that is a decision, fine. If you never actually asked the question, ask it now.",
+  "blind_spot": "Watch {lens}. It is what the role needs most, and it sits near the bottom of your strengths. The job needs most what you have least. Cover it: grow it, hire it, or borrow it, but do not ignore it.",
+  "comfort_strengths": "Your energy tracks your strengths more closely than it tracks what the role needs. That is the default: leaders put energy into what they are already good at, not what matters most. Decide whether this is a choice or a habit.",
+  "comfort_role": "Your energy tracks what the role needs more closely than it tracks your current strengths. You are growing toward the job, not away from it.",
+  "comfort_even": "Your energy sits evenly between your strengths and what the role needs. That can be balance, or it can be indecision. Push it one way on purpose.",
+  "comfort_same": "Your strengths already stack the way the role needs, position for position. The question left is the future one: does your energy build the stack your next role will need?",
+  "alignment": "Position for position: your energy matches the role's needs in {en} of 4 spots, and your strengths match in {sn} of 4.",
+  "joy_clash": "One more thing. You marked {lens} as work that drains you, and it is your growth edge. Growing where the work drains you is a hard road. Read Joy vs Drain, linked below, before you commit.",
+  "joy_superpower_drain": "You marked {lens} as work that drains you, and it is your superpower. Being good at something is not a reason to keep doing it. Read Joy vs Drain, linked below.",
+  "joy_clear": "Your superpower and your growth edge both sit on the joy side of your list. Growth that is also fun is growth that happens.",
+  "joy_clear_no_edge": "Your superpower sits on the joy side of your list. Strength that is also fun is strength that lasts.",
+  "closing": "Development is not only patching weakness. Align your growth with work that is fun, with the roles you want next, with what your team needs, and with where the market is going. Retake this in six months and compare the stacks."
+}

@@ -1,0 +1,48 @@
+{
+  "lenses": [
+    {
+      "letter": "C",
+      "name": "Customer",
+      "aliases": ["Product"],
+      "definition": "Who you serve and what they need.",
+      "examples": [
+        "Segmenting customers and naming their pain points",
+        "Walking the experience end to end, as the customer meets it",
+        "Deciding what the product does next, and what it will not do"
+      ]
+    },
+    {
+      "letter": "B",
+      "name": "Business",
+      "aliases": ["Strategy", "Industry"],
+      "definition": "How the company wins.",
+      "examples": [
+        "Pricing the offering and picking the business model",
+        "Sizing the market, the competition, and where to play",
+        "Choosing partners and setting the metrics that define winning"
+      ]
+    },
+    {
+      "letter": "T",
+      "name": "Technology",
+      "aliases": ["Execution"],
+      "definition": "How things get built and shipped.",
+      "examples": [
+        "Choosing the architecture and owning its trade-offs",
+        "Setting the operational bar: reliability, security, cost",
+        "Getting releases out the door, again and again"
+      ]
+    },
+    {
+      "letter": "O",
+      "name": "Organization",
+      "aliases": ["People"],
+      "definition": "The humans who build and how they work together.",
+      "examples": [
+        "Hiring, growing, and calibrating the team",
+        "Designing the org: who owns what, and how decisions get made",
+        "Setting the principles the team runs on"
+      ]
+    }
+  ]
+}
