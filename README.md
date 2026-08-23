@@ -64,7 +64,7 @@ Lifts the model functions out of `js/cbto.js` rather than restating them, so the
 
 ## Status
 
-Built. Goes live at https://kindel.com/cbto/ when the host mounts it.
+Live at https://kindel.com/cbto/.
 
 ## Teaching
 
