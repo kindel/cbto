@@ -130,8 +130,8 @@
     {
       key: "s",
       title: "Current strengths",
-      ask: "What are you strongest at today?",
-      hint: "Rank all four, strongest at the top. Not what you enjoy, not what you wish: what you are provably good at right now."
+      ask: "Who are you closest to matching?",
+      hint: "For each lens, think of someone you have actually worked with who was your hero at that work. Were they world class? Rank by the remaining gap to their bar. Smallest gap at the top. Not what you enjoy. Not your job title."
     },
     {
       key: "e",
@@ -152,6 +152,7 @@
   var interp = null;
   var orders = { s: "CBTO".split(""), e: "CBTO".split(""), n: "CBTO".split("") };
   var joySel = { C: null, B: null, T: null, O: null };
+  var heroes = { C: "", B: "", T: "", O: "" };
 
   function esc(t) {
     return String(t).replace(/[&<>"']/g, function (c) {
@@ -232,6 +233,7 @@
   function renderRank(idx) {
     var r = RANKS[idx];
     var order = orders[r.key];
+    var isStrengths = idx === 0;
     var html = '<p class="cbto-step">Step ' + (idx + 1) + " of 3</p>" +
       "<h2>" + esc(r.title) + "</h2>" +
       '<p class="cbto-ask">' + esc(r.ask) + "</p>" +
@@ -239,10 +241,17 @@
       '<ol class="cbto-rank" id="cbto-rank">';
     for (var i = 0; i < order.length; i++) {
       var l = lensByLetter(order[i]);
+      var heroVal = heroes[l.letter] || "";
+      var heroLabel = heroVal ? "Gap to " + esc(heroVal) : "Someone who set your bar";
       html += '<li class="cbto-card cbto-lens-' + l.letter.toLowerCase() + '" draggable="true" data-letter="' + l.letter + '">' +
         '<span class="cbto-dot" aria-hidden="true"></span>' +
         '<span class="cbto-card-body"><strong>' + esc(l.name) + "</strong>" +
-        '<span class="cbto-card-def">' + esc(l.definition) + "</span></span>" +
+        '<span class="cbto-card-def">' + esc(l.definition) + "</span>";
+      if (isStrengths) {
+        html += '<label class="cbto-hero-field"><span class="cbto-hero-label">' + heroLabel + "</span>" +
+          '<input type="text" class="cbto-hero-input" data-lens="' + l.letter + '" value="' + esc(heroVal) + '" placeholder="a person you have worked with" aria-label="' + esc(l.name) + ': someone who set your bar"></label>';
+      }
+      html += "</span>" +
         '<span class="cbto-moves">' +
         '<button type="button" class="cbto-move" data-dir="-1" aria-label="Move ' + esc(l.name) + ' up"' + (i === 0 ? " disabled" : "") + ">▲</button>" +
         '<button type="button" class="cbto-move" data-dir="1" aria-label="Move ' + esc(l.name) + ' down"' + (i === 3 ? " disabled" : "") + ">▼</button>" +
@@ -257,6 +266,21 @@
 
     var list = document.getElementById("cbto-rank");
     var dragging = null;
+
+    if (isStrengths) {
+      var heroInputs = list.querySelectorAll(".cbto-hero-input");
+      heroInputs.forEach(function (inp) {
+        ["pointerdown", "mousedown", "touchstart"].forEach(function (evName) {
+          inp.addEventListener(evName, function (ev) { ev.stopPropagation(); });
+        });
+        inp.addEventListener("input", function () {
+          var lens = inp.getAttribute("data-lens");
+          heroes[lens] = inp.value;
+          var label = inp.previousElementSibling;
+          label.textContent = inp.value ? "Gap to " + inp.value : "Someone who set your bar";
+        });
+      });
+    }
 
     list.addEventListener("click", function (ev) {
       var btn = ev.target.closest(".cbto-move");

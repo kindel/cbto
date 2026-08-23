@@ -51,7 +51,15 @@ opens with "Learn the lenses" and "Start the rank" side by side.
 
 The three questions from the 2025 post, one screen each:
 
-1. **Current Strengths**: strongest to weakest, today.
+1. **Current Strengths**: calibrated against a real hero. For each
+   lens, the user thinks of someone they have actually worked with
+   who was their hero at that work. Were they world class? The user
+   ranks by the remaining gap to that person's bar, smallest gap at
+   the top. Each card has an optional one-line field to name the
+   hero ("Someone who set your bar"); the label becomes "Gap to
+   {name}" when filled. Names are optional, never block Next, and
+   stay in the browser (session only, not in localStorage or
+   permalinks).
 2. **Future Energy**: where growth matters most over the next 5–10
    years, given the roles you want.
 3. **Role Needs**: what the current role, manager, and team actually
