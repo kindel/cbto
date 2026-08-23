@@ -149,6 +149,7 @@
 
   var lenses = [];
   var names = {};
+  var PIEP = { C: "Product", B: "Industry", T: "Execution", O: "People" };
   var interp = null;
   var orders = { s: "CBTO".split(""), e: "CBTO".split(""), n: "CBTO".split("") };
   var joySel = { C: null, B: null, T: null, O: null };
@@ -245,7 +246,7 @@
       var heroLabel = heroVal ? "Gap to " + esc(heroVal) : "Someone who set your bar";
       html += '<li class="cbto-card cbto-lens-' + l.letter.toLowerCase() + '" draggable="true" data-letter="' + l.letter + '">' +
         '<span class="cbto-dot" aria-hidden="true"></span>' +
-        '<span class="cbto-card-body"><strong>' + esc(l.name) + "</strong>" +
+        '<span class="cbto-card-body"><strong class="cbto-card-name">' + esc(l.name) + '</strong><span class="cbto-card-piep"> / ' + esc(PIEP[l.letter]) + '</span>' +
         '<span class="cbto-card-def">' + esc(l.definition) + "</span>";
       if (isStrengths) {
         html += '<label class="cbto-hero-field"><span class="cbto-hero-label">' + heroLabel + "</span>" +
@@ -345,7 +346,7 @@
       var v = joySel[l.letter];
       html += '<div class="cbto-joy-row cbto-lens-' + l.letter.toLowerCase() + '" data-letter="' + l.letter + '">' +
         '<span class="cbto-dot" aria-hidden="true"></span>' +
-        '<span class="cbto-joy-name">' + esc(l.name) + "</span>" +
+        '<span class="cbto-joy-name"><span class="cbto-joy-name-main">' + esc(l.name) + '</span><span class="cbto-joy-piep"> / ' + esc(PIEP[l.letter]) + '</span></span>' +
         '<span class="cbto-joy-buttons" role="group" aria-label="' + esc(l.name) + ': joy or drain">' +
         '<button type="button" class="cbto-joy-btn" data-v="joy" aria-pressed="' + (v === "joy") + '">Joy</button>' +
         '<button type="button" class="cbto-joy-btn" data-v="drain" aria-pressed="' + (v === "drain") + '">Drain</button>' +
