@@ -4,6 +4,7 @@
       "letter": "C",
       "name": "Customer",
       "aliases": ["Product"],
+      "piep": "Product",
       "definition": "Who you serve and what they need.",
       "examples": [
         "Segmenting customers and naming their pain points",
@@ -15,6 +16,7 @@
       "letter": "B",
       "name": "Business",
       "aliases": ["Strategy", "Industry"],
+      "piep": "Industry",
       "definition": "How the company wins.",
       "examples": [
         "Pricing the offering and picking the business model",
@@ -26,6 +28,7 @@
       "letter": "T",
       "name": "Technology",
       "aliases": ["Execution"],
+      "piep": "Execution",
       "definition": "How things get built and shipped.",
       "examples": [
         "Choosing the architecture and owning its trade-offs",
@@ -37,6 +40,7 @@
       "letter": "O",
       "name": "Organization",
       "aliases": ["People"],
+      "piep": "People",
       "definition": "The humans who build and how they work together.",
       "examples": [
         "Hiring, growing, and calibrating the team",

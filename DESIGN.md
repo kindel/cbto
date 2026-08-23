@@ -36,13 +36,20 @@ can run the exercise with their own team afterwards.
 
 ### 1. Teach
 
-One screen per lens, four screens, skippable. Each card gives the lens,
-its aliases (Customer/Product; Business/Strategy; Technology/Execution;
-Organization/People), a one-sentence definition, and three example
+One screen per lens, four screens, skippable. Each card gives the lens
+name and all its aliases (shown as "also called Product", "also called
+Strategy, Industry"), a one-sentence definition, and three example
 activities ("segmenting users", "pricing the offering", "choosing the
 architecture", "running calibrations"). The examples matter: they are
 what makes the ranking honest, because the user ranks against work they
 recognize, not against words they like the sound of.
+
+The rank and joy screens show each lens as "Name / piep" (Customer /
+Product, Business / Industry, Technology / Execution, Organization /
+People). The `piep` field in `data/lenses.json` picks one synonym per
+lens for this card title; hosts who override `window.CBTO.lenses` can
+change it. When `piep` is missing, the card falls back to the first
+alias.
 
 A user who arrives from the blog already knows the model; the wizard
 opens with "Learn the lenses" and "Start the rank" side by side.
@@ -158,7 +165,7 @@ with `fetch`, hosted by kindelwww at `/cbto/` and runnable locally with
 index.html            the wizard and results
 css/cbto.css
 js/cbto.js
-data/lenses.json      lens names, aliases, definitions, example activities
+data/lenses.json      lens names, aliases, piep (card synonym), definitions, examples
 data/interpretations.json   signal-keyed reading templates
 scripts/check_reading.js    the checks (see below)
 card.json             already present; status flips to "live" at ship
