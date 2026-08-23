@@ -246,12 +246,8 @@ h1, h2, h3 {
   color: var(--cbto-muted);
 }
 
-.cbto-lens-c .cbto-card-name {
+.cbto-letter {
   font-size: 2rem;
-}
-
-.cbto-lens-c .cbto-card-piep {
-  font-size: 1.1rem;
 }
 
 .cbto-hero-field {
@@ -360,14 +356,6 @@ h1, h2, h3 {
 .cbto-joy-piep {
   font-weight: 400;
   color: var(--cbto-muted);
-}
-
-.cbto-lens-c .cbto-joy-name-main {
-  font-size: 2rem;
-}
-
-.cbto-lens-c .cbto-joy-piep {
-  font-size: 1.1rem;
 }
 
 .cbto-joy-buttons {
