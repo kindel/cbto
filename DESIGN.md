@@ -1,8 +1,8 @@
 # CBTO app design
 
-A proposal. No app code ships with this document. The README stays the
-truth about status; this is the plan for what the app does for users and
-how it is built when it is built.
+The design for the CBTO app. v1 (the solo wizard) is implemented in this
+repo; the Roadmap section tracks what is not. The README stays the truth
+about status.
 
 ## What the user leaves with
 
@@ -67,7 +67,7 @@ alternative input mode, the app can ask the six pairwise questions per
 stack ("Over the last month, which did you actually spend more of your
 best work on: Customer or Technology?") and derive the order. Slower,
 more honest. Offered as "Not sure? Answer six quick either/ors
-instead." Ships in v1 only if cheap; otherwise v1.1.
+instead." Planned for v1.1.
 
 ### 3. Results
 
@@ -77,7 +77,7 @@ the reading, generated from rules (see Interpretation):
 
 - **Superpower**: top of Strengths.
 - **Growth edge**: high in Energy, low in Strengths.
-- **Drift risk**: Energy tracks Strengths but not Role — you are
+- **Comfort zone**: Energy tracks Strengths but not Role — you are
   investing in what you are already good at.
 - **Blind spot**: top of Role, bottom of Strengths — the job needs most
   what you have least.
@@ -108,7 +108,7 @@ from the three permutations:
 | --- | --- |
 | Superpower | Strengths rank 1 |
 | Growth edge | max(StrengthsRank − EnergyRank), i.e. ranked much higher in Energy than in Strengths |
-| Drift risk | Energy closer to Strengths than to Role (footrule distance) |
+| Comfort zone | Energy closer to Strengths than to Role (footrule distance) |
 | Blind spot | Role rank 1 with Strengths rank 3–4 |
 | Alignment | per-pair footrule distance, rendered as positions-in-common |
 
@@ -180,7 +180,7 @@ Per the tenets, each rule ships with the check that fails on it, in
 2. Permalinks round-trip: encode(decode(x)) is identity across all
    combinations.
 3. The signal functions are lifted from `js/cbto.js`, not restated, so
-   the check cannot drift from what the page runs (biq's
+   the check cannot fall out of step with what the page runs (biq's
    `check_search.js` pattern).
 4. `data/lenses.json` has exactly four lenses, each with aliases,
    definition, and at least three example activities.
@@ -194,7 +194,7 @@ Per the tenets, each rule ships with the check that fails on it, in
   needs." Produces a shareable role card to hold a loop against.
   Mostly reuses v1; earns its keep in the card.json summary's "hiring
   a leader" case.
-- **v1.2 — forced-pairs input**, if it did not make v1.
+- **v1.2 — forced-pairs input.**
 - **v2 — team view.** A facilitator pastes team members' permalinks;
   the app renders the team's stacks as a grid and flags the overweight
   lens and the uncovered one. Still no backend: the permalinks are the
