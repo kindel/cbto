@@ -64,7 +64,7 @@ Lifts the model functions out of `js/cbto.js` rather than restating them, so the
 
 ## Status
 
-Live at https://kindel.com/cbto/.
+Live at https://kindel.com/kld/apps/cbto/.
 
 ## Teaching
 
