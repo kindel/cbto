@@ -14,4 +14,4 @@ The tenets for this work live in the Tenets section of https://github.com/kindel
 
 SCHEMA.md is the contract. The data is data/index.json, data/facets.json, and data/<company>/<slug>.json. Do not fork a private copy of a set into this repo.
 
-CBTO-specific: the stack-rank app (Customer, Business, Technology, Organization). A static page, vanilla JS, no build step. The model functions live between the model markers in js/cbto.js; scripts/check_reading.js lifts them by name and checks every input — run it before committing. The check also enforces a banned-word list (see BANNED in scripts/check_reading.js, owner's call); never write those words anywhere in this repo, prose or code.
+CBTO-specific: the stack-rank app (Customer, Business, Technology, Organization). A static page, vanilla JS, no build step. The model functions live between the model markers in js/cbto.js; scripts/check_reading.js lifts them by name and checks every input. Run it before committing. The check also enforces a banned-word list (see BANNED in scripts/check_reading.js, owner's call); never write those words anywhere in this repo, prose or code.

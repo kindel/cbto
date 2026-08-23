@@ -96,7 +96,10 @@
     if (sig.joy != null) {
       if (sig.edgeDrained) out.push({ key: "joy_clash", text: fill(interp.joy_clash, { lens: names[sig.edge] }) });
       if (sig.superDrained) out.push({ key: "joy_superpower_drain", text: fill(interp.joy_superpower_drain, { lens: names[sig.superpower] }) });
-      if (!sig.edgeDrained && !sig.superDrained) out.push({ key: "joy_clear", text: interp.joy_clear });
+      if (!sig.edgeDrained && !sig.superDrained) {
+        if (sig.edge != null) out.push({ key: "joy_clear", text: interp.joy_clear });
+        else out.push({ key: "joy_clear_no_edge", text: interp.joy_clear_no_edge });
+      }
     }
     out.push({ key: "closing", text: interp.closing });
     return out;
@@ -178,8 +181,10 @@
     try {
       var runs = loadRuns();
       var last = runs[runs.length - 1];
-      if (last && last.s === st.s && last.e === st.e && last.n === st.n && (last.j == null ? null : last.j) === st.j) return runs;
-      runs.push({ t: new Date().toISOString().slice(0, 10), s: st.s, e: st.e, n: st.n, j: st.j });
+      var today = new Date().toISOString().slice(0, 10);
+      var sameStacks = last && last.s === st.s && last.e === st.e && last.n === st.n && (last.j == null ? null : last.j) === st.j;
+      if (sameStacks && last.t === today) return runs;
+      runs.push({ t: today, s: st.s, e: st.e, n: st.n, j: st.j });
       if (runs.length > 24) runs = runs.slice(runs.length - 24);
       localStorage.setItem(RUNS_KEY, JSON.stringify(runs));
       return runs;
@@ -374,7 +379,7 @@
   }
 
   function toMarkdown(st, paras) {
-    var lines = ["# CBTO stack rank — " + new Date().toISOString().slice(0, 10), ""];
+    var lines = ["# CBTO stack rank, " + new Date().toISOString().slice(0, 10), ""];
     lines.push("| | Strengths today | Future energy | Role needs |");
     lines.push("|---|---|---|---|");
     for (var i = 0; i < 4; i++) {
@@ -404,7 +409,7 @@
     if (runs.length > (isCurrent ? 1 : 0)) {
       html += '<details class="cbto-history"><summary>Past runs on this browser</summary><ul>';
       runs.slice().reverse().forEach(function (run) {
-        html += '<li><a href="' + esc(location.pathname + encodeState(run)) + '">' + esc(run.t) + "</a> — S " + esc(run.s) + " · E " + esc(run.e) + " · N " + esc(run.n) + "</li>";
+        html += '<li><a href="' + esc(location.pathname + encodeState(run)) + '">' + esc(run.t) + "</a>: S " + esc(run.s) + " · E " + esc(run.e) + " · N " + esc(run.n) + "</li>";
       });
       html += "</ul></details>";
     }
@@ -470,11 +475,25 @@
     else renderIntro(false);
   }
 
+  function validateLenses(arr) {
+    if (!Array.isArray(arr) || arr.length !== 4) return false;
+    var seen = {};
+    for (var i = 0; i < arr.length; i++) {
+      var l = arr[i];
+      if (!l || typeof l.letter !== "string" || "CBTO".indexOf(l.letter) < 0) return false;
+      if (seen[l.letter]) return false;
+      seen[l.letter] = true;
+    }
+    return seen.C && seen.B && seen.T && seen.O;
+  }
+
   Promise.all([fetch(lensesUrl), fetch(interpUrl)]).then(function (rs) {
     if (!rs[0].ok || !rs[1].ok) throw new Error("fetch failed");
     return Promise.all([rs[0].json(), rs[1].json()]);
   }).then(function (data) {
-    lenses = data[0].lenses;
+    var rawLenses = data[0].lenses;
+    if (!validateLenses(rawLenses)) throw new Error("invalid lenses data");
+    lenses = rawLenses;
     lenses.forEach(function (l) { names[l.letter] = l.name; });
     interp = data[1];
     init();

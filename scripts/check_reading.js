@@ -133,9 +133,27 @@ for (const qs of ["", "?s=CCBO&e=CBTO&n=CBTO", "?s=CBTO&e=CBTO", "?s=CBTO&e=CBTO
   if (m.decodeState(qs) !== null) fail.push(`decodeState accepted ${JSON.stringify(qs)}`);
 }
 
-// Banned words never appear in the repo. Owner's call; the list is assembled
-// from pieces so this file does not trip its own check.
-const BANNED = [new RegExp("dri" + "ft", "i")];
+// Identical stacks with joy including superpower must use joy_clear_no_edge, not joy_clear.
+for (const s of STACKS) {
+  const superpower = s[0];
+  for (const j of JOYS) {
+    if (j.indexOf(superpower) < 0) continue; // superpower drained, different path
+    for (const n of STACKS) {
+      const paras = m.buildReading(m.signals(s, s, n, j), names, interp);
+      const keys = paras.map((p) => p.key);
+      if (keys.includes("joy_clear")) {
+        fail.push(`identical stacks s=e=${s} with joy=${j} should not emit joy_clear (mentions growth edge that does not exist)`);
+      }
+      if (!keys.includes("joy_clear_no_edge")) {
+        fail.push(`identical stacks s=e=${s} with joy=${j} should emit joy_clear_no_edge`);
+      }
+    }
+  }
+}
+
+// Banned words and characters never appear in the repo. Owner's call; the list
+// is assembled from pieces so this file does not trip its own check.
+const BANNED = [new RegExp("dri" + "ft", "i"), /\u2014/];
 const SKIP_DIRS = new Set([".git", "node_modules"]);
 const SKIP_EXT = new Set([".png", ".jpg", ".gif", ".ico", ".woff", ".woff2"]);
 (function walk(dir) {

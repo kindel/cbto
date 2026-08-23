@@ -13,11 +13,11 @@ things, stated in plain language on one results screen:
 1. **Their superpower.** The lens at the top of their Current Strengths
    stack, named as such.
 2. **Their growth edge.** The lens where Future Energy ranks high but
-   Current Strengths ranks low — where intentional growth pays off.
+   Current Strengths ranks low, where intentional growth pays off.
 3. **The match, or the mismatch.** Whether their energy is going where
    the role actually needs it, or to what they are already good at.
-   The 2025 post's core claim — most leaders default to their existing
-   strengths — is the thing the results screen makes undeniable.
+   The 2025 post's core claim (most leaders default to their existing
+   strengths) is the thing the results screen makes undeniable.
 
 Secondary outcomes: an artifact they can bring to a manager, mentor, or
 Office Hours conversation, and enough teaching along the way that they
@@ -30,7 +30,7 @@ can run the exercise with their own team afterwards.
 - **A hiring manager**: rank what the role needs before the loop, then
   hold candidates against that stack instead of against charisma.
 - **A team**: find out whether the leadership team is overweight on one
-  lens. (v2 — see Roadmap.)
+  lens. (v2; see Roadmap.)
 
 ## The flow
 
@@ -51,10 +51,10 @@ opens with "Learn the lenses" and "Start the rank" side by side.
 
 The three questions from the 2025 post, one screen each:
 
-1. **Current Strengths** — strongest to weakest, today.
-2. **Future Energy** — where growth matters most over the next 5–10
+1. **Current Strengths**: strongest to weakest, today.
+2. **Future Energy**: where growth matters most over the next 5–10
    years, given the roles you want.
-3. **Role Needs** — what the current role, manager, and team actually
+3. **Role Needs**: what the current role, manager, and team actually
    need, ranked by importance to the job. The prompt says explicitly:
    rank the job, not yourself.
 
@@ -69,35 +69,39 @@ best work on: Customer or Technology?") and derive the order. Slower,
 more honest. Offered as "Not sure? Answer six quick either/ors
 instead." Planned for v1.1.
 
-### 3. Results
+### 3. Joy or drain (optional, bridge not merge)
 
-Three columns side by side — Strengths, Energy, Role — with the four
+One optional screen before results: "For each lens, does this work
+bring you joy or drain you?" Four toggles, ten seconds, skippable. The
+user can skip the joy check and go straight to results, or answer all
+four toggles and click "See results." The full Joy/Drain exercise stays
+in its own post and future app; CBTO only surfaces the collision when
+it exists. The README draws this boundary ("related, not this app") and
+this design keeps it.
+
+### 4. Results
+
+Three columns side by side (Strengths, Energy, Role) with the four
 lenses color-coded so the eye tracks each lens across the columns. Then
 the reading, generated from rules (see Interpretation):
 
 - **Superpower**: top of Strengths.
 - **Growth edge**: high in Energy, low in Strengths.
-- **Comfort zone**: Energy tracks Strengths but not Role — you are
+- **Comfort zone**: Energy tracks Strengths but not Role; you are
   investing in what you are already good at.
-- **Blind spot**: top of Role, bottom of Strengths — the job needs most
+- **Blind spot**: top of Role, bottom of Strengths; the job needs most
   what you have least.
 - **Alignment**: a plain-language distance between stacks ("Your energy
   matches the role's needs in 1 of 4 positions"), never a bare score.
 
+If the user answered the joy check and the growth edge lands on a lens
+marked as drain, the reading says so: "You plan to grow where the work
+drains you; read Joy vs Drain before you commit," and links the 2025
+Joy vs Drain post.
+
 The reading closes on the post's counterweight: development is not only
-patching weakness — it is aligning growth with work that is fun, future
-roles, team needs, and market demands. Which sets up:
-
-### 4. The joy check (bridge, not merge)
-
-One optional question after results: "For each lens, does this work
-bring you joy or drain you?" Four toggles, ten seconds. If the growth
-edge lands on a lens the user marks as drain, the reading says so —
-"You plan to grow where the work drains you; read Joy vs Drain before
-you commit" — and links the 2025 Joy vs Drain post. The full Joy/Drain
-exercise stays in that post and its own future app; CBTO only surfaces
-the collision. The README already draws this boundary ("related, not
-this app") and this design keeps it.
+patching weakness; it is aligning growth with work that is fun, future
+roles, team needs, and market demands.
 
 ## Interpretation engine
 
@@ -154,16 +158,18 @@ icon.png              already present
 ```
 
 - **State and sharing.** The three stacks (plus the optional joy
-  toggles) encode into the URL — three base-4 permutation indices and
-  four bits, comfortably under 20 characters. A permalink reproduces
-  the results screen exactly. Copy-as-Markdown gives the three stacks
-  and the reading as text for a doc or a 1:1 agenda. `localStorage`
-  keeps past runs so a user can retake in six months and see the diff
-  ("your Strengths stack moved; your Energy stack did not").
+  toggles) encode into the URL as human-readable query parameters:
+  `?s=CBTO&e=TOBC&n=BCOT&j=CT`. Each stack is four letters in rank
+  order; `j` holds the letters marked as joy (omitted when skipped).
+  A permalink reproduces the results screen exactly. Copy-as-Markdown
+  gives the three stacks and the reading as text for a doc or a 1:1
+  agenda. `localStorage` keeps past runs so a user can retake in six
+  months and see the diff ("your Strengths stack moved; your Energy
+  stack did not").
 - **Host override.** `window.CBTO = { lenses: "...", interpretations:
   "..." }` before `js/cbto.js` loads, mirroring `window.BIQ`.
 - **Attribution.** A visible link to https://kindel.com on the page,
-  per AGENTS.md — not only in LICENSE.
+  per AGENTS.md, not only in LICENSE.
 - **Principles alignment.** CBTO carries no company sets, so the core
   model it must not fork is the CBTO model itself: the lens
   definitions and the exercise live in `data/`, the wizard renders
@@ -176,7 +182,7 @@ Per the tenets, each rule ships with the check that fails on it, in
 `scripts/check_reading.js`, run by CI:
 
 1. Every one of the 13,824 stack combinations produces a complete
-   reading — no signal resolves to a missing template.
+   reading; no signal resolves to a missing template.
 2. Permalinks round-trip: encode(decode(x)) is identity across all
    combinations.
 3. The signal functions are lifted from `js/cbto.js`, not restated, so
@@ -187,15 +193,15 @@ Per the tenets, each rule ships with the check that fails on it, in
 
 ## Roadmap
 
-- **v1 — the solo wizard.** Teach, three ranks, results, joy check,
+- **v1 (the solo wizard).** Teach, three ranks, results, joy check,
   permalink, copy-as-Markdown, localStorage history. This is the app
   card's promise and nothing more.
-- **v1.1 — hiring mode.** Same wizard, one stack: "Rank what this role
+- **v1.1 (hiring mode).** Same wizard, one stack: "Rank what this role
   needs." Produces a shareable role card to hold a loop against.
   Mostly reuses v1; earns its keep in the card.json summary's "hiring
   a leader" case.
-- **v1.2 — forced-pairs input.**
-- **v2 — team view.** A facilitator pastes team members' permalinks;
+- **v1.2 (forced-pairs input).**
+- **v2 (team view).** A facilitator pastes team members' permalinks;
   the app renders the team's stacks as a grid and flags the overweight
   lens and the uncovered one. Still no backend: the permalinks are the
   data transport.
