@@ -3,6 +3,7 @@
   var lensesUrl = cfg.lenses || "data/lenses.json";
   var interpUrl = cfg.interpretations || "data/interpretations.json";
   var RUNS_KEY = "cbto-runs";
+  var JOY_DRAIN_URL = "https://blog.kindel.com/2025/02/05/stop-answering-the-wrong-question-unlock-your-true-work-happiness/";
 
   // --- model ---------------------------------------------------------------
   // Pure functions, no DOM. scripts/check_reading.js lifts these by name and
@@ -158,6 +159,14 @@
     return String(t).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
+  }
+
+  function joyDrainLink() {
+    return '<a href="' + JOY_DRAIN_URL + '" target="_blank" rel="noopener noreferrer">Joy vs Drain</a>';
+  }
+
+  function linkJoyDrainPhrase(escaped) {
+    return escaped.replace(/Joy vs Drain/g, joyDrainLink());
   }
 
   function dropCapName(name) {
@@ -346,7 +355,7 @@
 
   function renderJoy() {
     var html = '<p class="cbto-step">Optional</p>' +
-      "<h2>Joy or drain?</h2>" +
+      '<h2><a href="' + JOY_DRAIN_URL + '" target="_blank" rel="noopener noreferrer">Joy or drain?</a></h2>' +
       '<p class="cbto-ask">For each lens: does the work itself bring you joy, or does it drain you?</p>' +
       '<p class="cbto-hint">You can be really good at something and still find it soul-sucking. Answer for the work, not the outcomes.</p>' +
       '<div class="cbto-joy" id="cbto-joy">';
@@ -411,6 +420,17 @@
     return "Joy: " + (joy.join(", ") || "none") + ". Drain: " + (drain.join(", ") || "none") + ".";
   }
 
+  function joyLineHtml(j) {
+    var joy = [];
+    var drain = [];
+    "CBTO".split("").forEach(function (ch) {
+      (j.indexOf(ch) >= 0 ? joy : drain).push(esc(names[ch]));
+    });
+    var joyLink = '<a href="' + JOY_DRAIN_URL + '" target="_blank" rel="noopener noreferrer">Joy</a>';
+    var drainLink = '<a href="' + JOY_DRAIN_URL + '" target="_blank" rel="noopener noreferrer">Drain</a>';
+    return joyLink + ": " + (joy.join(", ") || "none") + ". " + drainLink + ": " + (drain.join(", ") || "none") + ".";
+  }
+
   function toMarkdown(st, paras) {
     var lines = ["# CBTO stack rank, " + new Date().toISOString().slice(0, 10), ""];
     lines.push("| | Strengths today | Future energy | Role needs |");
@@ -420,8 +440,13 @@
     }
     if (st.j != null) lines.push("", joyLineText(st.j));
     lines.push("");
-    paras.forEach(function (p) { lines.push("- " + p.text); });
+    var hasJoyDrain = false;
+    paras.forEach(function (p) {
+      if (p.text.indexOf("Joy vs Drain") >= 0) hasJoyDrain = true;
+      lines.push("- " + p.text);
+    });
     lines.push("", "The CBTO stack rank: https://kindel.com/cbto/");
+    if (hasJoyDrain) lines.push("Joy vs Drain: " + JOY_DRAIN_URL);
     return lines.join("\n");
   }
 
@@ -476,9 +501,9 @@
     try { history.replaceState(null, "", location.pathname + encodeState(st)); } catch (err) {}
     var paras = buildReading(signals(st.s, st.e, st.n, st.j), names, interp);
     var html = "<h2>Your stacks</h2>" + columnsHtml(st) +
-      (st.j != null ? '<p class="cbto-joyline">' + esc(joyLineText(st.j)) + "</p>" : "") +
+      (st.j != null ? '<p class="cbto-joyline">' + joyLineHtml(st.j) + "</p>" : "") +
       '<div class="cbto-reading" aria-live="polite">' +
-      paras.map(function (p) { return "<p>" + esc(p.text) + "</p>"; }).join("") +
+      paras.map(function (p) { return "<p>" + linkJoyDrainPhrase(esc(p.text)) + "</p>"; }).join("") +
       "</div>" +
       '<div class="cbto-actions">' +
       '<button type="button" class="cbto-btn" id="cbto-copy-link">Copy link</button>' +
