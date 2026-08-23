@@ -237,6 +237,40 @@ h1, h2, h3 {
   font-size: 0.92rem;
 }
 
+.cbto-hero-field {
+  display: block;
+  margin-top: 0.5rem;
+}
+
+.cbto-hero-label {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--cbto-muted);
+  margin-bottom: 0.15rem;
+}
+
+.cbto-hero-input {
+  width: 100%;
+  max-width: 260px;
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--cbto-line);
+  border-radius: 6px;
+  background: var(--cbto-wash);
+  color: var(--cbto-ink);
+}
+
+.cbto-hero-input:focus {
+  outline: none;
+  border-color: var(--cbto-accent);
+}
+
+.cbto-hero-input::placeholder {
+  color: var(--cbto-muted);
+  opacity: 0.7;
+}
+
 .cbto-moves {
   display: flex;
   flex-direction: column;
