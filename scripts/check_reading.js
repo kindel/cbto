@@ -24,7 +24,9 @@ function lift(src) {
     return "";
   };
   const names = ["validStack", "validJoy", "rankOf", "footrule", "overlap",
-    "growthEdge", "signals", "fill", "buildReading", "encodeState", "decodeState"];
+    "growthEdge", "signals", "fill", "buildReading", "encodeState", "decodeState",
+    "defaultOrders", "applyOrder", "moveLetter", "ordersFromState", "stateFromOrders",
+    "afterRank", "finishState"];
   const code = names.map(grab).join("\n");
   for (const n of names) {
     if (code.indexOf("function " + n + "(") < 0) throw new Error("could not lift " + n + " from js/cbto.js");
@@ -131,6 +133,111 @@ for (const j of JOYS) {
 // Junk never decodes.
 for (const qs of ["", "?s=CCBO&e=CBTO&n=CBTO", "?s=CBTO&e=CBTO", "?s=CBTO&e=CBTO&n=CBTX", "?s=CBTO&e=CBTO&n=CBTO&j=OC", "?s=CBTO&e=CBTO&n=CBTO&j=CC"]) {
   if (m.decodeState(qs) !== null) fail.push(`decodeState accepted ${JSON.stringify(qs)}`);
+}
+
+// Ranking helpers: move, reject junk, and keep other stacks when you leave
+// one and come back (Back then Next). Permalinks restore those orders.
+{
+  const fresh = m.defaultOrders();
+  if (!fresh || fresh.s.join("") !== "CBTO" || fresh.e.join("") !== "CBTO" || fresh.n.join("") !== "CBTO") {
+    fail.push("defaultOrders must start every stack at CBTO");
+  }
+  const orig = ["C", "B", "T", "O"];
+  const once = m.moveLetter(orig, "O", -1);
+  if (orig.join("") !== "CBTO") fail.push("moveLetter mutated the input order");
+  if (!once || once.join("") !== "CBOT") fail.push("moveLetter O up once should be CBOT");
+  const twice = m.moveLetter(once, "O", -1);
+  if (!twice || twice.join("") !== "COBT") fail.push("moveLetter O up twice should be COBT");
+  const blocked = m.moveLetter(["C", "B", "T", "O"], "C", -1);
+  if (!blocked || blocked.join("") !== "CBTO") fail.push("moveLetter must not move the top card up");
+  const blockedDown = m.moveLetter(["C", "B", "T", "O"], "O", 1);
+  if (!blockedDown || blockedDown.join("") !== "CBTO") fail.push("moveLetter must not move the bottom card down");
+  if (m.moveLetter(["C", "B", "T"], "C", 1) !== null) fail.push("moveLetter must reject a short order");
+  if (m.applyOrder(["T", "O", "B", "C"]).join("") !== "TOBC") fail.push("applyOrder should accept TOBC");
+  if (m.applyOrder(["C", "C", "B", "T"]) !== null) fail.push("applyOrder must reject a duplicate");
+  if (m.applyOrder(["C", "B", "T"]) !== null) fail.push("applyOrder must reject a short list");
+  if (m.applyOrder(["C", "B", "T", "X"]) !== null) fail.push("applyOrder must reject a non-lens");
+
+  const orders = m.defaultOrders();
+  orders.s = m.moveLetter(orders.s, "O", -1);
+  orders.s = m.moveLetter(orders.s, "O", -1);
+  const savedS = orders.s.join("");
+  if (savedS !== "COBT") fail.push("strengths after two ups of O should be COBT");
+  orders.e = m.moveLetter(orders.e, "C", 1);
+  const savedE = orders.e.join("");
+  if (savedE !== "BCTO") fail.push("energy after moving C down should be BCTO");
+  if (orders.s.join("") !== savedS) fail.push("leaving a stack changed an earlier rank");
+  if (orders.e.join("") !== savedE) fail.push("returning to a stack wiped its order");
+  if (orders.n.join("") !== "CBTO") fail.push("an untouched stack must stay at the default order");
+
+  const st = m.stateFromOrders(orders, null);
+  if (!st || st.s !== savedS || st.e !== savedE || st.n !== "CBTO" || st.j !== null) {
+    fail.push("stateFromOrders lost a rank");
+  }
+  const qs = m.encodeState(st);
+  const decoded = m.decodeState(qs);
+  const restored = m.ordersFromState(decoded);
+  if (!restored || restored.s.join("") !== savedS || restored.e.join("") !== savedE || restored.n.join("") !== "CBTO") {
+    fail.push("permalink restore lost ranks");
+  }
+  const again = m.stateFromOrders(restored, decoded.j);
+  if (!again || m.encodeState(again) !== qs) fail.push("ordersFromState then stateFromOrders must round-trip");
+
+  if (m.stateFromOrders({ s: ["C"], e: ["C", "B", "T", "O"], n: ["C", "B", "T", "O"] }, null) !== null) {
+    fail.push("stateFromOrders must reject a short stack");
+  }
+  if (m.stateFromOrders(m.defaultOrders(), "CC") !== null) {
+    fail.push("stateFromOrders must reject invalid joy");
+  }
+  if (m.ordersFromState({ s: "CBTO", e: "CBTO", n: "XXXX" }) !== null) {
+    fail.push("ordersFromState must reject an invalid stack");
+  }
+  if (m.ordersFromState(null) !== null) fail.push("ordersFromState must reject null");
+}
+
+// After a rank: first-time Next continues (and Joy is last). Editing returns
+// to results after that rank and does not walk Joy again. First-time skip
+// has no joy. Editing one stack keeps the other two and keeps previous j
+// unless the user re-answers joy.
+{
+  if (m.afterRank(0, false) !== "continue") fail.push("first-time after strengths should continue");
+  if (m.afterRank(1, false) !== "continue") fail.push("first-time after grow should continue");
+  if (m.afterRank(2, false) !== "joy") fail.push("first-time after role needs should go to joy");
+  if (m.afterRank(0, true) !== "results") fail.push("editing strengths should return to results");
+  if (m.afterRank(1, true) !== "results") fail.push("editing grow should return to results");
+  if (m.afterRank(2, true) !== "results") fail.push("editing role needs should return to results");
+
+  const first = m.finishState(m.defaultOrders(), null, null);
+  if (!first || first.s !== "CBTO" || first.e !== "CBTO" || first.n !== "CBTO" || first.j !== null) {
+    fail.push("first-time skip must encode no joy");
+  }
+  const firstQs = m.encodeState(first);
+  if (firstQs.indexOf("j=") >= 0) fail.push("first-time skip permalink must omit j");
+
+  const previous = { s: "BCTO", e: "TOBC", n: "CBOT", j: "CT" };
+  const orders = m.ordersFromState(previous);
+  orders.e = m.applyOrder(["T", "B", "O", "C"]);
+  if (m.afterRank(1, true) !== "results") {
+    fail.push("changing grow-the-most must return to results without walking joy");
+  }
+  const edited = m.finishState(orders, null, previous);
+  if (!edited || edited.s !== "BCTO" || edited.n !== "CBOT") {
+    fail.push("editing one stack must keep the other two stacks");
+  }
+  if (!edited || edited.e !== "TBOC") fail.push("editing grow-the-most must keep the new energy order");
+  if (!edited || edited.j !== "CT") fail.push("returning to results must keep previous joy");
+  const editedQs = m.encodeState(edited);
+  if (editedQs.indexOf("j=CT") < 0) fail.push("edited permalink must still carry j");
+
+  const reanswered = m.finishState(orders, "BO", previous);
+  if (!reanswered || reanswered.j !== "BO") fail.push("re-answering joy must replace previous j");
+  if (!reanswered || reanswered.s !== "BCTO" || reanswered.e !== "TBOC" || reanswered.n !== "CBOT") {
+    fail.push("re-answering joy must keep the edited stacks");
+  }
+
+  if (m.finishState({ s: ["C"], e: ["C", "B", "T", "O"], n: ["C", "B", "T", "O"] }, null, previous) !== null) {
+    fail.push("finishState must reject a short stack");
+  }
 }
 
 // Identical stacks with joy including superpower must use joy_clear_no_edge, not joy_clear.

@@ -58,24 +58,28 @@ opens with "Learn the lenses" and "Start the rank" side by side.
 
 The three questions from the 2025 post, one screen each:
 
-1. **Current Strengths**: calibrated against a real hero. For each
-   lens, the user thinks of someone they have actually worked with
-   who was their hero at that work. Were they world class? The user
-   ranks by the remaining gap to that person's bar, smallest gap at
-   the top. Each card has an optional one-line field to name the
-   hero ("Someone who set your bar"); the label becomes "Gap to
-   {name}" when filled. Names are optional, never block Next, and
-   stay in the browser (session only, not in localStorage or
+1. **Current Strengths**: what you are strongest at today. Ranking
+   the four cards is the first action. An optional, collapsed field
+   can name a person who set the bar for a lens. Names never appear
+   as the first focus, never look required, and never block Next.
+   They stay in the browser (session only, not in localStorage or
    permalinks).
-2. **Future Energy**: where growth matters most over the next 5–10
-   years, given the roles you want.
+2. **Future Energy**: the rank screen asks "Where do you want to
+   grow the most?" The model name stays on results as a caption
+   under Grow the most.
 3. **Role Needs**: what the current role, manager, and team actually
    need, ranked by importance to the job. The prompt says explicitly:
    rank the job, not yourself.
 
 Interaction: drag-to-rank four cards on desktop, tap-to-order on
-mobile. Each screen restates its question in one line and shows the
-lens examples on hover/tap so the user ranks behavior, not vocabulary.
+mobile. Each rank screen says which of those to do, so a first-time
+user does not need a coach. Next sits under the cards, before the
+optional names and the examples, so ranking is the path. Back keeps
+every stack already set. Going back and then Next restores the
+previous order. Each screen restates its question in one line and
+shows the lens examples so the user ranks behavior, not vocabulary.
+The page lede shrinks once the wizard is underway so Next and Share
+stay on the first screen.
 
 **Forced-pairs mode (optional).** Self-ranking flatters. As an
 alternative input mode, the app can ask the six pairwise questions per
@@ -88,17 +92,26 @@ instead." Planned for v1.1.
 
 One optional screen before results: "For each lens, does this work
 bring you joy or drain you?" Four toggles, ten seconds, skippable. The
-user can skip the joy check and go straight to results, or answer all
-four toggles and click "See results." The full Joy/Drain exercise stays
-in its own post and future app; CBTO only surfaces the collision when
-it exists. The README draws this boundary ("related, not this app") and
-this design keeps it.
+default five-minute path treats this as skippable: Skip to results is
+the primary action, and Skip still reaches results. Answering all four
+toggles and clicking Include joy in results is extra. The full
+Joy/Drain exercise stays in its own post and future app; CBTO only
+surfaces the collision when it exists. The README draws this boundary
+("related, not this app") and this design keeps it.
 
 ### 4. Results
 
-Three columns side by side (Strengths, Energy, Role) with the four
-lenses color-coded so the eye tracks each lens across the columns. Then
-the reading, generated from rules (see Interpretation):
+The reading leads: Superpower and Growth edge first, in plain
+language. Then three columns side by side (Strengths today, Grow the
+most, Role needs) with the four lenses color-coded so the eye tracks
+each lens across the columns. Role needs is the comparison, not the
+first thing to decode. Each column has a Change control that returns
+to that rank and keeps the other stacks. Next from that rank returns
+to results and keeps any joy already on the result. It does not walk
+Joy again unless the user opens that screen and re-answers. Share sits
+with Superpower and Growth edge, as the primary action once results
+exist. Start over is quiet, so editing does not look like a restart.
+The reading, generated from rules (see Interpretation):
 
 - **Superpower**: top of Strengths.
 - **Growth edge**: high in Energy, low in Strengths.
