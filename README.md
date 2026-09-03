@@ -13,8 +13,8 @@ An interactive app that walks you through the CBTO stack rank so you can see you
 
 The stack rank asks three questions:
 
-1. **Current Strengths**: What are you strongest at today? Rank all four, strongest to weakest. This is your superpower stack.
-2. **Future Energy**: Where should you be putting energy over the next 5-10 years? Rank all four by where growth matters most.
+1. **Current Strengths**: What are you strongest at today? Rank all four, strongest to weakest. This is your superpower stack. Naming a person who set your bar is optional and never required.
+2. **Future Energy**: Where do you want to grow the most? Rank all four by where growth matters most.
 3. **Role Alignment**: What does your current role (or manager, or team) actually need? Rank all four by importance to the job.
 
 Compare the three stacks. Gaps reveal where your energy is defaulting to what you are already good at, and where intentional growth will pay off.
@@ -27,9 +27,9 @@ Tig Kindel derived CBTO from J Allard's BXT (Business + eXperience + Technology)
 
 ## The app
 
-A static page, vanilla JS, no build step. It walks the three ranks, asks an optional joy-or-drain question, and reads the stacks back: your superpower, your growth edge, whether the energy matches the role, and where the job needs most what you have least. The reading is rule-based and deterministic; the same stacks always read the same way. See DESIGN.md for the full design.
+A static page, vanilla JS, no build step. It walks the three ranks, offers an optional joy-or-drain question you can skip, and reads the stacks back: your superpower, your growth edge, whether the energy matches the role, and where the job needs most what you have least. You can go back and change a stack without starting over. The reading is rule-based and deterministic; the same stacks always read the same way. See DESIGN.md for the full design.
 
-Results encode into the URL, so a permalink reproduces them, and past runs are kept in the browser's localStorage so a retake months later shows what moved. Nothing you enter leaves the browser.
+Results encode into the URL, so a permalink reproduces them. Share copies that link. Past runs are kept in the browser's localStorage so a retake months later shows what moved. Nothing you enter leaves the browser.
 
 ### Run
 

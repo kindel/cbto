@@ -122,6 +122,43 @@
     if (j != null && !validJoy(j)) return null;
     return { s: s, e: e, n: n, j: j == null ? null : j };
   }
+
+  function defaultOrders() {
+    return { s: ["C", "B", "T", "O"], e: ["C", "B", "T", "O"], n: ["C", "B", "T", "O"] };
+  }
+
+  function applyOrder(letters) {
+    if (!letters || letters.length !== 4) return null;
+    var next = [];
+    for (var i = 0; i < 4; i++) next.push(letters[i]);
+    return validStack(next.join("")) ? next : null;
+  }
+
+  function moveLetter(order, letter, dir) {
+    if (!order || order.length !== 4) return null;
+    var next = order.slice();
+    var from = next.indexOf(letter);
+    var to = from + Number(dir);
+    if (from < 0 || to < 0 || to > 3) return next;
+    next.splice(from, 1);
+    next.splice(to, 0, letter);
+    return next;
+  }
+
+  function ordersFromState(st) {
+    if (!st || !validStack(st.s) || !validStack(st.e) || !validStack(st.n)) return null;
+    return { s: st.s.split(""), e: st.e.split(""), n: st.n.split("") };
+  }
+
+  function stateFromOrders(orders, j) {
+    if (!orders) return null;
+    var s = orders.s && orders.s.join("");
+    var e = orders.e && orders.e.join("");
+    var n = orders.n && orders.n.join("");
+    if (!validStack(s) || !validStack(e) || !validStack(n)) return null;
+    if (j != null && !validJoy(j)) return null;
+    return { s: s, e: e, n: n, j: j == null ? null : j };
+  }
   // --- end model -----------------------------------------------------------
 
   var root = document.getElementById("cbto-app");
@@ -130,30 +167,31 @@
   var RANKS = [
     {
       key: "s",
-      title: "Current strengths",
-      ask: "Who are you closest to matching?",
-      hint: "For each lens, think of someone you have actually worked with who was your hero at that work. Were they world class? Rank by the remaining gap to their bar. Smallest gap at the top. Not what you enjoy. Not your job title."
+      title: "What are you strongest at today?",
+      ask: "Rank all four. Strongest at the top.",
+      hint: "Rank yourself. Not what you enjoy. Not your job title. A name is optional and never required."
     },
     {
       key: "e",
-      title: "Future energy",
-      ask: "Where should your energy go over the next 5–10 years?",
-      hint: "Rank by where growth matters most, given the roles you want next."
+      title: "Where do you want to grow the most?",
+      ask: "Rank all four. Growth that matters most at the top.",
+      hint: "Think about the roles you want next, not only the job you have now. This stack is your future energy."
     },
     {
       key: "n",
-      title: "Role needs",
-      ask: "What does your current role actually need?",
-      hint: "Rank by importance to the job: the role, the manager, the team. Rank the job, not yourself."
+      title: "What does your current role actually need?",
+      ask: "Rank the job, not yourself.",
+      hint: "Rank by importance to the role, the manager, and the team."
     }
   ];
 
   var lenses = [];
   var names = {};
   var interp = null;
-  var orders = { s: "CBTO".split(""), e: "CBTO".split(""), n: "CBTO".split("") };
+  var orders = defaultOrders();
   var joySel = { C: null, B: null, T: null, O: null };
   var heroes = { C: "", B: "", T: "", O: "" };
+  var lastResults = null;
 
   function esc(t) {
     return String(t).replace(/[&<>"']/g, function (c) {
@@ -212,10 +250,29 @@
     }
   }
 
+  function resetWizard() {
+    orders = defaultOrders();
+    joySel = { C: null, B: null, T: null, O: null };
+    heroes = { C: "", B: "", T: "", O: "" };
+    lastResults = null;
+  }
+
+  function adoptState(st) {
+    var restored = ordersFromState(st);
+    if (restored) orders = restored;
+    joySel = { C: null, B: null, T: null, O: null };
+    if (st && st.j != null) {
+      "CBTO".split("").forEach(function (ch) {
+        joySel[ch] = st.j.indexOf(ch) >= 0 ? "joy" : "drain";
+      });
+    }
+    lastResults = st;
+  }
+
   function renderIntro(showTeach) {
     var html = '<div class="cbto-intro">' +
-      "<p>The exercise is three stack ranks of the same four lenses: what you are strongest at today, where your energy should go next, and what your current role needs. The gaps between the three stacks are the point.</p>" +
-      "<p>It takes about three minutes. There are no ties: the forced rank is the exercise.</p>" +
+      "<p>The exercise is three stack ranks of the same four lenses: what you are strongest at today, where you want to grow the most, and what your current role needs. The gaps between the three stacks are the point.</p>" +
+      "<p>It takes a few minutes. Rank the cards. You can go back and change a stack without starting over. Names are optional. There are no ties: the forced rank is the exercise.</p>" +
       '<div class="cbto-actions">' +
       '<button type="button" class="cbto-btn cbto-btn-primary" id="cbto-start">Start the rank</button>' +
       '<button type="button" class="cbto-btn" id="cbto-teach-toggle" aria-expanded="' + (showTeach ? "true" : "false") + '">' +
@@ -248,6 +305,26 @@
     return html + "</details>";
   }
 
+  function heroFieldsHtml() {
+    var anyHero = heroes.C || heroes.B || heroes.T || heroes.O;
+    var html = '<details class="cbto-heroes"' + (anyHero ? " open" : "") + ">" +
+      "<summary>Optional: name who set your bar</summary>" +
+      '<p class="cbto-hint">A name can help you judge the gap. You do not need one, and Next does not wait for it.</p>';
+    lenses.forEach(function (l) {
+      var heroVal = heroes[l.letter] || "";
+      var heroLabel = heroVal ? "Gap to " + heroVal : "Someone who set your bar for " + l.name;
+      html += '<label class="cbto-hero-field"><span class="cbto-hero-label">' + esc(heroLabel) + "</span>" +
+        '<input type="text" class="cbto-hero-input" data-lens="' + l.letter + '" value="' + esc(heroVal) + '" placeholder="optional" aria-label="' + esc(l.name) + ': optional, someone who set your bar"></label>';
+    });
+    return html + "</details>";
+  }
+
+  function backLabel(idx) {
+    if (idx === 0) return lastResults ? "Back to results" : "Back";
+    if (idx === 1) return "Back to strengths";
+    return "Back to grow the most";
+  }
+
   function renderRank(idx) {
     var r = RANKS[idx];
     var order = orders[r.key];
@@ -256,28 +333,27 @@
       "<h2>" + esc(r.title) + "</h2>" +
       '<p class="cbto-ask">' + esc(r.ask) + "</p>" +
       '<p class="cbto-hint">' + esc(r.hint) + "</p>" +
+      '<p class="cbto-how cbto-how-desktop">Drag the cards to rank them. Strongest at the top.</p>' +
+      '<p class="cbto-how cbto-how-mobile">Tap the arrows to rank them. Strongest at the top.</p>' +
       '<ol class="cbto-rank" id="cbto-rank">';
     for (var i = 0; i < order.length; i++) {
       var l = lensByLetter(order[i]);
-      var heroVal = heroes[l.letter] || "";
-      var heroLabel = heroVal ? "Gap to " + esc(heroVal) : "Someone who set your bar";
       html += '<li class="cbto-card cbto-lens-' + l.letter.toLowerCase() + '" draggable="true" data-letter="' + l.letter + '">' +
+        '<span class="cbto-grip" aria-hidden="true"></span>' +
         '<span class="cbto-dot" aria-hidden="true"></span>' +
         '<span class="cbto-card-body"><strong class="cbto-card-name">' + dropCapName(l.name) + '</strong><span class="cbto-card-piep"> / ' + esc(piep(l)) + '</span>' +
-        '<span class="cbto-card-def">' + esc(l.definition) + "</span>";
-      if (isStrengths) {
-        html += '<label class="cbto-hero-field"><span class="cbto-hero-label">' + heroLabel + "</span>" +
-          '<input type="text" class="cbto-hero-input" data-lens="' + l.letter + '" value="' + esc(heroVal) + '" placeholder="a person you have worked with" aria-label="' + esc(l.name) + ': someone who set your bar"></label>';
-      }
-      html += "</span>" +
+        '<span class="cbto-card-def">' + esc(l.definition) + "</span></span>" +
         '<span class="cbto-moves">' +
         '<button type="button" class="cbto-move" data-dir="-1" aria-label="Move ' + esc(l.name) + ' up"' + (i === 0 ? " disabled" : "") + ">▲</button>" +
         '<button type="button" class="cbto-move" data-dir="1" aria-label="Move ' + esc(l.name) + ' down"' + (i === 3 ? " disabled" : "") + ">▼</button>" +
         "</span></li>";
     }
-    html += "</ol>" + examplesHtml() +
+    html += "</ol>";
+    if (isStrengths) html += heroFieldsHtml();
+    html += examplesHtml() +
+      '<p class="cbto-persist">Back keeps the order you already set. You do not need to start over.</p>' +
       '<div class="cbto-actions">' +
-      '<button type="button" class="cbto-btn" id="cbto-back">Back</button>' +
+      '<button type="button" class="cbto-btn" id="cbto-back">' + esc(backLabel(idx)) + "</button>" +
       '<button type="button" class="cbto-btn cbto-btn-primary" id="cbto-next">' + (idx === 2 ? "Continue" : "Next") + "</button>" +
       "</div>";
     root.innerHTML = html;
@@ -286,7 +362,7 @@
     var dragging = null;
 
     if (isStrengths) {
-      var heroInputs = list.querySelectorAll(".cbto-hero-input");
+      var heroInputs = root.querySelectorAll(".cbto-hero-input");
       heroInputs.forEach(function (inp) {
         ["pointerdown", "mousedown", "touchstart"].forEach(function (evName) {
           inp.addEventListener(evName, function (ev) { ev.stopPropagation(); });
@@ -295,7 +371,7 @@
           var lens = inp.getAttribute("data-lens");
           heroes[lens] = inp.value;
           var label = inp.previousElementSibling;
-          label.textContent = inp.value ? "Gap to " + inp.value : "Someone who set your bar";
+          label.textContent = inp.value ? "Gap to " + inp.value : "Someone who set your bar for " + names[lens];
         });
       });
     }
@@ -304,11 +380,9 @@
       var btn = ev.target.closest(".cbto-move");
       if (!btn || btn.disabled) return;
       var ch = btn.closest("li").getAttribute("data-letter");
-      var from = order.indexOf(ch);
-      var to = from + Number(btn.getAttribute("data-dir"));
-      if (to < 0 || to > 3) return;
-      order.splice(from, 1);
-      order.splice(to, 0, ch);
+      var next = moveLetter(order, ch, btn.getAttribute("data-dir"));
+      if (!next) return;
+      orders[r.key] = next;
       renderRank(idx);
     });
 
@@ -335,13 +409,20 @@
       dragging.classList.remove("cbto-dragging");
       dragging = null;
       var lis = list.querySelectorAll("li");
-      for (var i = 0; i < lis.length; i++) order[i] = lis[i].getAttribute("data-letter");
+      var letters = [];
+      for (var i = 0; i < lis.length; i++) letters.push(lis[i].getAttribute("data-letter"));
+      var next = applyOrder(letters);
+      if (next) orders[r.key] = next;
       renderRank(idx);
     });
 
     document.getElementById("cbto-back").addEventListener("click", function () {
-      if (idx === 0) renderIntro(false);
-      else renderRank(idx - 1);
+      if (idx === 0) {
+        if (lastResults) showResults(lastResults, loadRuns());
+        else renderIntro(false);
+      } else {
+        renderRank(idx - 1);
+      }
     });
     document.getElementById("cbto-next").addEventListener("click", function () {
       if (idx === 2) renderJoy();
@@ -354,10 +435,10 @@
   }
 
   function renderJoy() {
-    var html = '<p class="cbto-step">Optional</p>' +
+    var html = '<p class="cbto-step">Optional. Skip this if you want.</p>' +
       '<h2><a href="' + JOY_DRAIN_URL + '" target="_blank" rel="noopener noreferrer">Joy or drain?</a></h2>' +
-      '<p class="cbto-ask">For each lens: does the work itself bring you joy, or does it drain you?</p>' +
-      '<p class="cbto-hint">You can be really good at something and still find it soul-sucking. Answer for the work, not the outcomes.</p>' +
+      '<p class="cbto-ask">Optional. For each lens: does the work itself bring you joy, or does it drain you?</p>' +
+      '<p class="cbto-hint">The short path skips this. You can be really good at something and still find it soul-sucking. Answer for the work, not the outcomes, or skip to your stacks.</p>' +
       '<div class="cbto-joy" id="cbto-joy">';
     lenses.forEach(function (l) {
       var v = joySel[l.letter];
@@ -370,10 +451,11 @@
         "</span></div>";
     });
     html += "</div>" +
+      '<p class="cbto-persist">Skip still takes you to results. Back keeps your ranks.</p>' +
       '<div class="cbto-actions">' +
-      '<button type="button" class="cbto-btn" id="cbto-back">Back</button>' +
-      '<button type="button" class="cbto-btn" id="cbto-skip">Skip</button>' +
-      '<button type="button" class="cbto-btn cbto-btn-primary" id="cbto-finish"' + (allJoySet() ? "" : " disabled") + ">See results</button>" +
+      '<button type="button" class="cbto-btn" id="cbto-back">Back to role needs</button>' +
+      '<button type="button" class="cbto-btn cbto-btn-primary" id="cbto-skip">Skip to results</button>' +
+      '<button type="button" class="cbto-btn" id="cbto-finish"' + (allJoySet() ? "" : " disabled") + ">Include joy in results</button>" +
       "</div>";
     root.innerHTML = html;
     document.getElementById("cbto-joy").addEventListener("click", function (ev) {
@@ -399,16 +481,25 @@
     showResults(st, saveRun(st));
   }
 
-  function columnsHtml(st) {
-    var cols = [["Strengths today", st.s], ["Future energy", st.e], ["Role needs", st.n]];
-    return '<div class="cbto-cols">' + cols.map(function (c) {
-      var lis = "";
-      for (var i = 0; i < 4; i++) {
-        var ch = c[1].charAt(i);
-        lis += '<li class="cbto-lens-' + ch.toLowerCase() + '"><span class="cbto-dot" aria-hidden="true"></span>' + esc(names[ch]) + "</li>";
-      }
-      return '<div class="cbto-col"><h3>' + esc(c[0]) + "</h3><ol>" + lis + "</ol></div>";
-    }).join("") + "</div>";
+  function columnsHtml(st, sig) {
+    var cols = [
+      { title: "Strengths today", ask: "What you are strongest at.", stack: st.s, edit: 0, mark: sig && sig.superpower, markLabel: "Superpower", compare: false },
+      { title: "Grow the most", ask: "Where you want to grow. Future energy.", stack: st.e, edit: 1, mark: sig && sig.edge, markLabel: "Growth edge", compare: false },
+      { title: "Role needs", ask: "What the job needs. Compare this last.", stack: st.n, edit: 2, mark: null, markLabel: "", compare: true }
+    ];
+    return '<p class="cbto-cols-lead">Read Superpower and Growth edge first. Role needs is the comparison, not the thing to decode first.</p>' +
+      '<div class="cbto-cols">' + cols.map(function (c) {
+        var lis = "";
+        for (var i = 0; i < 4; i++) {
+          var ch = c.stack.charAt(i);
+          var badge = c.mark && ch === c.mark ? ' <span class="cbto-mark">' + esc(c.markLabel) + "</span>" : "";
+          lis += '<li class="cbto-lens-' + ch.toLowerCase() + '"><span class="cbto-dot" aria-hidden="true"></span>' + esc(names[ch]) + badge + "</li>";
+        }
+        return '<div class="cbto-col' + (c.compare ? " cbto-col-compare" : "") + '">' +
+          '<div class="cbto-col-head"><h3>' + esc(c.title) + "</h3>" +
+          '<button type="button" class="cbto-edit" data-edit-rank="' + c.edit + '">Change</button></div>' +
+          '<p class="cbto-col-ask">' + esc(c.ask) + "</p><ol>" + lis + "</ol></div>";
+      }).join("") + "</div>";
   }
 
   function joyLineText(j) {
@@ -433,7 +524,7 @@
 
   function toMarkdown(st, paras) {
     var lines = ["# CBTO stack rank, " + new Date().toISOString().slice(0, 10), ""];
-    lines.push("| | Strengths today | Future energy | Role needs |");
+    lines.push("| | Strengths today | Grow the most | Role needs |");
     lines.push("|---|---|---|---|");
     for (var i = 0; i < 4; i++) {
       lines.push("| " + (i + 1) + " | " + names[st.s.charAt(i)] + " | " + names[st.e.charAt(i)] + " | " + names[st.n.charAt(i)] + " |");
@@ -497,32 +588,61 @@
     }
   }
 
+  function shareResults(btn) {
+    var url = location.href;
+    if (navigator.share) {
+      navigator.share({ title: "CBTO stack rank", url: url }).catch(function () {
+        copyText(url, btn);
+      });
+      return;
+    }
+    copyText(url, btn);
+  }
+
   function showResults(st, runs) {
+    adoptState(st);
     try { history.replaceState(null, "", location.pathname + encodeState(st)); } catch (err) {}
-    var paras = buildReading(signals(st.s, st.e, st.n, st.j), names, interp);
-    var html = "<h2>Your stacks</h2>" + columnsHtml(st) +
+    var sig = signals(st.s, st.e, st.n, st.j);
+    var paras = buildReading(sig, names, interp);
+    var lead = [];
+    var rest = [];
+    paras.forEach(function (p) {
+      if (p.key === "superpower" || p.key === "growth_edge" || p.key === "growth_edge_none") lead.push(p);
+      else rest.push(p);
+    });
+    var html = "<h2>Your superpower and growth edge</h2>" +
+      '<div class="cbto-lead" aria-live="polite">' +
+      lead.map(function (p) { return "<p>" + linkJoyDrainPhrase(esc(p.text)) + "</p>"; }).join("") +
+      "</div>" +
+      "<h3 class=\"cbto-stacks-head\">The three stacks</h3>" +
+      columnsHtml(st, sig) +
       (st.j != null ? '<p class="cbto-joyline">' + joyLineHtml(st.j) + "</p>" : "") +
-      '<div class="cbto-reading" aria-live="polite">' +
-      paras.map(function (p) { return "<p>" + linkJoyDrainPhrase(esc(p.text)) + "</p>"; }).join("") +
+      '<div class="cbto-reading">' +
+      rest.map(function (p) { return "<p>" + linkJoyDrainPhrase(esc(p.text)) + "</p>"; }).join("") +
       "</div>" +
       '<div class="cbto-actions">' +
-      '<button type="button" class="cbto-btn" id="cbto-copy-link">Copy link</button>' +
+      '<button type="button" class="cbto-btn cbto-btn-primary" id="cbto-share">Share</button>' +
       '<button type="button" class="cbto-btn" id="cbto-copy-md">Copy as Markdown</button>' +
-      '<button type="button" class="cbto-btn cbto-btn-primary" id="cbto-again">Start over</button>' +
+      '<button type="button" class="cbto-btn cbto-btn-quiet" id="cbto-again">Start over</button>' +
       "</div>" +
       historyHtml(st, runs);
     root.innerHTML = html;
 
-    document.getElementById("cbto-copy-link").addEventListener("click", function () {
-      copyText(location.href, this);
+    document.getElementById("cbto-share").addEventListener("click", function () {
+      shareResults(this);
     });
     document.getElementById("cbto-copy-md").addEventListener("click", function () {
       copyText(toMarkdown(st, paras), this);
     });
+    root.querySelectorAll("[data-edit-rank]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        adoptState(st);
+        renderRank(Number(btn.getAttribute("data-edit-rank")));
+      });
+    });
     document.getElementById("cbto-again").addEventListener("click", function () {
       try { history.replaceState(null, "", location.pathname); } catch (err) {}
-      orders = { s: "CBTO".split(""), e: "CBTO".split(""), n: "CBTO".split("") };
-      joySel = { C: null, B: null, T: null, O: null };
+      resetWizard();
       renderIntro(false);
     });
   }
