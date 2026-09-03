@@ -25,7 +25,8 @@ function lift(src) {
   };
   const names = ["validStack", "validJoy", "rankOf", "footrule", "overlap",
     "growthEdge", "signals", "fill", "buildReading", "encodeState", "decodeState",
-    "defaultOrders", "applyOrder", "moveLetter", "ordersFromState", "stateFromOrders"];
+    "defaultOrders", "applyOrder", "moveLetter", "ordersFromState", "stateFromOrders",
+    "afterRank", "finishState"];
   const code = names.map(grab).join("\n");
   for (const n of names) {
     if (code.indexOf("function " + n + "(") < 0) throw new Error("could not lift " + n + " from js/cbto.js");
@@ -192,6 +193,51 @@ for (const qs of ["", "?s=CCBO&e=CBTO&n=CBTO", "?s=CBTO&e=CBTO", "?s=CBTO&e=CBTO
     fail.push("ordersFromState must reject an invalid stack");
   }
   if (m.ordersFromState(null) !== null) fail.push("ordersFromState must reject null");
+}
+
+// After a rank: first-time Next continues (and Joy is last). Editing returns
+// to results after that rank and does not walk Joy again. First-time skip
+// has no joy. Editing one stack keeps the other two and keeps previous j
+// unless the user re-answers joy.
+{
+  if (m.afterRank(0, false) !== "continue") fail.push("first-time after strengths should continue");
+  if (m.afterRank(1, false) !== "continue") fail.push("first-time after grow should continue");
+  if (m.afterRank(2, false) !== "joy") fail.push("first-time after role needs should go to joy");
+  if (m.afterRank(0, true) !== "results") fail.push("editing strengths should return to results");
+  if (m.afterRank(1, true) !== "results") fail.push("editing grow should return to results");
+  if (m.afterRank(2, true) !== "results") fail.push("editing role needs should return to results");
+
+  const first = m.finishState(m.defaultOrders(), null, null);
+  if (!first || first.s !== "CBTO" || first.e !== "CBTO" || first.n !== "CBTO" || first.j !== null) {
+    fail.push("first-time skip must encode no joy");
+  }
+  const firstQs = m.encodeState(first);
+  if (firstQs.indexOf("j=") >= 0) fail.push("first-time skip permalink must omit j");
+
+  const previous = { s: "BCTO", e: "TOBC", n: "CBOT", j: "CT" };
+  const orders = m.ordersFromState(previous);
+  orders.e = m.applyOrder(["T", "B", "O", "C"]);
+  if (m.afterRank(1, true) !== "results") {
+    fail.push("changing grow-the-most must return to results without walking joy");
+  }
+  const edited = m.finishState(orders, null, previous);
+  if (!edited || edited.s !== "BCTO" || edited.n !== "CBOT") {
+    fail.push("editing one stack must keep the other two stacks");
+  }
+  if (!edited || edited.e !== "TBOC") fail.push("editing grow-the-most must keep the new energy order");
+  if (!edited || edited.j !== "CT") fail.push("returning to results must keep previous joy");
+  const editedQs = m.encodeState(edited);
+  if (editedQs.indexOf("j=CT") < 0) fail.push("edited permalink must still carry j");
+
+  const reanswered = m.finishState(orders, "BO", previous);
+  if (!reanswered || reanswered.j !== "BO") fail.push("re-answering joy must replace previous j");
+  if (!reanswered || reanswered.s !== "BCTO" || reanswered.e !== "TBOC" || reanswered.n !== "CBOT") {
+    fail.push("re-answering joy must keep the edited stacks");
+  }
+
+  if (m.finishState({ s: ["C"], e: ["C", "B", "T", "O"], n: ["C", "B", "T", "O"] }, null, previous) !== null) {
+    fail.push("finishState must reject a short stack");
+  }
 }
 
 // Identical stacks with joy including superpower must use joy_clear_no_edge, not joy_clear.

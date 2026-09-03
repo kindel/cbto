@@ -159,6 +159,19 @@
     if (j != null && !validJoy(j)) return null;
     return { s: s, e: e, n: n, j: j == null ? null : j };
   }
+
+  function afterRank(idx, editing) {
+    if (editing) return "results";
+    if (idx === 2) return "joy";
+    if (idx === 0 || idx === 1) return "continue";
+    return null;
+  }
+
+  function finishState(orders, j, previous) {
+    var keep = j;
+    if (keep == null && previous && previous.j != null) keep = previous.j;
+    return stateFromOrders(orders, keep);
+  }
   // --- end model -----------------------------------------------------------
 
   var root = document.getElementById("cbto-app");
@@ -432,8 +445,10 @@
       }
     });
     document.getElementById("cbto-next").addEventListener("click", function () {
-      if (idx === 2) renderJoy();
-      else renderRank(idx + 1);
+      var dest = afterRank(idx, !!lastResults);
+      if (dest === "results") finish(false);
+      else if (dest === "joy") renderJoy();
+      else if (dest === "continue") renderRank(idx + 1);
     });
   }
 
@@ -485,7 +500,8 @@
       j = "";
       "CBTO".split("").forEach(function (ch) { if (joySel[ch] === "joy") j += ch; });
     }
-    var st = { s: orders.s.join(""), e: orders.e.join(""), n: orders.n.join(""), j: j };
+    var st = finishState(orders, withJoy ? j : null, lastResults);
+    if (!st) return;
     showResults(st, saveRun(st));
   }
 

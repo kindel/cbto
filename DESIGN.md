@@ -106,10 +106,12 @@ language. Then three columns side by side (Strengths today, Grow the
 most, Role needs) with the four lenses color-coded so the eye tracks
 each lens across the columns. Role needs is the comparison, not the
 first thing to decode. Each column has a Change control that returns
-to that rank and keeps the other stacks. Share sits with Superpower
-and Growth edge, as the primary action once results exist. Start
-over is quiet, so editing does not look like a restart. The reading,
-generated from rules (see Interpretation):
+to that rank and keeps the other stacks. Next from that rank returns
+to results and keeps any joy already on the result. It does not walk
+Joy again unless the user opens that screen and re-answers. Share sits
+with Superpower and Growth edge, as the primary action once results
+exist. Start over is quiet, so editing does not look like a restart.
+The reading, generated from rules (see Interpretation):
 
 - **Superpower**: top of Strengths.
 - **Growth edge**: high in Energy, low in Strengths.
