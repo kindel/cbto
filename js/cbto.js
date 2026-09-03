@@ -250,11 +250,16 @@
     }
   }
 
+  function setFlow(inFlow) {
+    document.body.classList.toggle("cbto-in-flow", !!inFlow);
+  }
+
   function resetWizard() {
     orders = defaultOrders();
     joySel = { C: null, B: null, T: null, O: null };
     heroes = { C: "", B: "", T: "", O: "" };
     lastResults = null;
+    setFlow(false);
   }
 
   function adoptState(st) {
@@ -290,6 +295,7 @@
       });
       html += "</div>";
     }
+    setFlow(false);
     root.innerHTML = html;
     document.getElementById("cbto-start").addEventListener("click", function () { renderRank(0); });
     document.getElementById("cbto-teach-toggle").addEventListener("click", function () { renderIntro(!showTeach); });
@@ -349,13 +355,14 @@
         "</span></li>";
     }
     html += "</ol>";
-    if (isStrengths) html += heroFieldsHtml();
-    html += examplesHtml() +
-      '<p class="cbto-persist">Back keeps the order you already set. You do not need to start over.</p>' +
+    html += '<p class="cbto-persist">Back keeps the order you already set. You do not need to start over.</p>' +
       '<div class="cbto-actions">' +
       '<button type="button" class="cbto-btn" id="cbto-back">' + esc(backLabel(idx)) + "</button>" +
       '<button type="button" class="cbto-btn cbto-btn-primary" id="cbto-next">' + (idx === 2 ? "Continue" : "Next") + "</button>" +
       "</div>";
+    if (isStrengths) html += heroFieldsHtml();
+    html += examplesHtml();
+    setFlow(true);
     root.innerHTML = html;
 
     var list = document.getElementById("cbto-rank");
@@ -457,6 +464,7 @@
       '<button type="button" class="cbto-btn cbto-btn-primary" id="cbto-skip">Skip to results</button>' +
       '<button type="button" class="cbto-btn" id="cbto-finish"' + (allJoySet() ? "" : " disabled") + ">Include joy in results</button>" +
       "</div>";
+    setFlow(true);
     root.innerHTML = html;
     document.getElementById("cbto-joy").addEventListener("click", function (ev) {
       var btn = ev.target.closest(".cbto-joy-btn");
@@ -614,18 +622,19 @@
       '<div class="cbto-lead" aria-live="polite">' +
       lead.map(function (p) { return "<p>" + linkJoyDrainPhrase(esc(p.text)) + "</p>"; }).join("") +
       "</div>" +
+      '<div class="cbto-actions cbto-actions-share">' +
+      '<button type="button" class="cbto-btn cbto-btn-primary" id="cbto-share">Share</button>' +
+      '<button type="button" class="cbto-btn" id="cbto-copy-md">Copy as Markdown</button>' +
+      '<button type="button" class="cbto-btn cbto-btn-quiet" id="cbto-again">Start over</button>' +
+      "</div>" +
       "<h3 class=\"cbto-stacks-head\">The three stacks</h3>" +
       columnsHtml(st, sig) +
       (st.j != null ? '<p class="cbto-joyline">' + joyLineHtml(st.j) + "</p>" : "") +
       '<div class="cbto-reading">' +
       rest.map(function (p) { return "<p>" + linkJoyDrainPhrase(esc(p.text)) + "</p>"; }).join("") +
       "</div>" +
-      '<div class="cbto-actions">' +
-      '<button type="button" class="cbto-btn cbto-btn-primary" id="cbto-share">Share</button>' +
-      '<button type="button" class="cbto-btn" id="cbto-copy-md">Copy as Markdown</button>' +
-      '<button type="button" class="cbto-btn cbto-btn-quiet" id="cbto-again">Start over</button>' +
-      "</div>" +
       historyHtml(st, runs);
+    setFlow(true);
     root.innerHTML = html;
 
     document.getElementById("cbto-share").addEventListener("click", function () {

@@ -73,10 +73,13 @@ The three questions from the 2025 post, one screen each:
 
 Interaction: drag-to-rank four cards on desktop, tap-to-order on
 mobile. Each rank screen says which of those to do, so a first-time
-user does not need a coach. Back keeps every stack already set.
-Going back and then Next restores the previous order. Each screen
-restates its question in one line and shows the lens examples so
-the user ranks behavior, not vocabulary.
+user does not need a coach. Next sits under the cards, before the
+optional names and the examples, so ranking is the path. Back keeps
+every stack already set. Going back and then Next restores the
+previous order. Each screen restates its question in one line and
+shows the lens examples so the user ranks behavior, not vocabulary.
+The page lede shrinks once the wizard is underway so Next and Share
+stay on the first screen.
 
 **Forced-pairs mode (optional).** Self-ranking flatters. As an
 alternative input mode, the app can ask the six pairwise questions per
@@ -103,9 +106,10 @@ language. Then three columns side by side (Strengths today, Grow the
 most, Role needs) with the four lenses color-coded so the eye tracks
 each lens across the columns. Role needs is the comparison, not the
 first thing to decode. Each column has a Change control that returns
-to that rank and keeps the other stacks. Share is the primary action
-once results exist. Start over is quiet, so editing does not look
-like a restart. The reading, generated from rules (see Interpretation):
+to that rank and keeps the other stacks. Share sits with Superpower
+and Growth edge, as the primary action once results exist. Start
+over is quiet, so editing does not look like a restart. The reading,
+generated from rules (see Interpretation):
 
 - **Superpower**: top of Strengths.
 - **Growth edge**: high in Energy, low in Strengths.
