@@ -405,58 +405,6 @@ h1, h2, h3 {
   margin: 0.6rem 0 0;
 }
 
-.cbto-joy-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  border: 1px solid var(--cbto-line);
-  border-left: 4px solid var(--cbto-lens, var(--cbto-line));
-  border-radius: 10px;
-  background: #fff;
-  padding: 0.6rem 0.9rem;
-  margin: 0 0 0.55rem;
-}
-
-.cbto-joy-name {
-  flex: 1;
-  font-weight: 600;
-}
-
-.cbto-joy-name-main {
-  font-size: 1rem;
-}
-
-.cbto-joy-piep {
-  font-weight: 400;
-  color: var(--cbto-muted);
-}
-
-.cbto-joy-buttons {
-  display: flex;
-  gap: 0.35rem;
-}
-
-.cbto-joy-btn {
-  font: inherit;
-  font-size: 0.92rem;
-  padding: 0.35rem 0.8rem;
-  border: 1px solid var(--cbto-line);
-  border-radius: 999px;
-  background: #fff;
-  color: var(--cbto-ink);
-  cursor: pointer;
-}
-
-.cbto-joy-btn:hover {
-  border-color: var(--cbto-accent);
-}
-
-.cbto-joy-btn[aria-pressed="true"] {
-  background: var(--cbto-accent);
-  border-color: var(--cbto-accent);
-  color: #fff;
-}
-
 .cbto-cols {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -464,8 +412,19 @@ h1, h2, h3 {
   margin: 1rem 0 1.25rem;
 }
 
+.cbto-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 760px) {
+  .cbto-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 640px) {
-  .cbto-cols {
+  .cbto-cols,
+  .cbto-cols-4 {
     grid-template-columns: 1fr;
   }
 }

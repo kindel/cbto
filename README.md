@@ -27,9 +27,9 @@ Tig Kindel derived CBTO from J Allard's BXT (Business + eXperience + Technology)
 
 ## The app
 
-A static page, vanilla JS, no build step. It walks the three ranks, offers an optional joy-or-drain question you can skip, and reads the stacks back: your superpower, your growth edge, whether the energy matches the role, and where the job needs most what you have least. You can go back and change a stack without starting over. The reading is rule-based and deterministic; the same stacks always read the same way. See DESIGN.md for the full design.
+A static page, vanilla JS, no build step. It walks the three ranks, offers an optional fourth rank you can skip (joy to drain: the work that brings you the most joy at the top, the work that drains you most at the bottom), and reads the stacks back: your superpower, your growth edge, whether the energy matches the role, and where the job needs most what you have least. With a joy rank, the reading also says whether the work the role needs most feeds you or drains you, and changes the advice to match. You can go back and change a stack without starting over. The reading is rule-based and deterministic; the same stacks always read the same way. See DESIGN.md for the full design.
 
-Results encode into the URL, so a permalink reproduces them. Share copies that link. Past runs are kept in the browser's localStorage so a retake months later shows what moved. Nothing you enter leaves the browser.
+Results encode into the URL, so a permalink reproduces them (`?s=CBTO&e=TOBC&n=BCOT&jd=OTCB`). Links from before the joy rank carry `j=` (the yes/no answer) and still load. Share copies that link. Past runs are kept in the browser's localStorage so a retake months later shows what moved. Nothing you enter leaves the browser.
 
 ### Run
 
@@ -60,7 +60,7 @@ The default data URLs are relative to the page. A host that mounts cbto elsewher
 node scripts/check_reading.js
 ```
 
-Lifts the model functions out of `js/cbto.js` rather than restating them, so the check cannot fall out of step with what the page runs. It verifies that every one of the 13,824 stack combinations produces a complete reading, that permalinks round-trip, that the lens data has the required shape, and that no banned word appears in the repo. CI runs it on every push.
+Lifts the model functions out of `js/cbto.js` rather than restating them, so the check cannot fall out of step with what the page runs. It verifies that every input combination produces a complete reading (all 13,824 stack combinations, with no joy, with each of the 24 joy ranks, and with each old yes/no joy answer), that permalinks round-trip, that old `j=` joy links still load, that the lens data has the required shape, and that no banned word appears in the repo. CI runs it on every push.
 
 ## Status
 

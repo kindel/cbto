@@ -8,9 +8,14 @@
   "comfort_even": "Your energy sits evenly between your strengths and what the role needs. That can be balance, or it can be indecision. Push it one way on purpose.",
   "comfort_same": "Your strengths already stack the way the role needs, position for position. The question left is the future one: does your energy build the stack your next role will need?",
   "alignment": "Position for position: your energy matches the role's needs in {en} of 4 spots, and your strengths match in {sn} of 4.",
-  "joy_clash": "One more thing. You marked {lens} as work that drains you, and it is your growth edge. Growing where the work drains you is a hard road. Read Joy vs Drain, linked below, before you commit.",
-  "joy_superpower_drain": "You marked {lens} as work that drains you, and it is your superpower. Being good at something is not a reason to keep doing it. Read Joy vs Drain, linked below.",
-  "joy_clear": "Your superpower and your growth edge both sit on the joy side of your list. Growth that is also fun is growth that happens.",
-  "joy_clear_no_edge": "Your superpower sits on the joy side of your list. Strength that is also fun is strength that lasts.",
+  "alignment_joy": "Position for position: your energy matches the role's needs in {en} of 4 spots, your strengths match in {sn} of 4, and your joy matches in {jn} of 4.",
+  "joy_role_2": "The role needs {a} and {b} most, and both sit on the joy end of your rank. The job feeds you. Protect that when you weigh your next move.",
+  "joy_role_1": "The role needs {a} and {b} most. {joy} sits on the joy end of your rank; {drain} sits on the drain end. Spend your best hours on {joy}. Get help on {drain}: a partner, a hire, or a hard cap on your time.",
+  "joy_role_0": "The role needs {a} and {b} most, and both sit on the drain end of your rank. The job runs on work that drains you, and you pay for that every week. Staff around it, cap your time on it, and weigh it when you pick your next role. Read Joy vs Drain, linked below.",
+  "joy_untapped": "{lens} is the work you enjoy most, and the role needs it. But you ranked it low in where you want to grow. That is the easiest growth you have. Put it back in the plan.",
+  "joy_edge_joy": "Your growth edge, {lens}, sits on the joy end of your rank. Growth that is also fun is growth that happens.",
+  "joy_edge_drain": "Your growth edge, {lens}, sits on the drain end of your rank. Growing where the work drains you is a hard road. Read Joy vs Drain, linked below, before you commit.",
+  "joy_superpower_drain": "{lens} is your superpower, and it is the work that drains you most. Being good at something is not a reason to keep doing it. Read Joy vs Drain, linked below.",
+  "joy_legacy": "This link is from the old joy check, which asked yes or no for each lens. Rank joy to drain and the reading will use it.",
   "closing": "Development is not only patching weakness. Align your growth with work that is fun, with the roles you want next, with what your team needs, and with where the market is going. Retake this in six months and compare the stacks."
 }
