@@ -223,7 +223,8 @@ icon.png              already present
   rank instead of guessing one. Rank joy to drain starts the cards
   from the old answer (joy letters first). Ranking replaces `j` with
   `jd`; editing a stack keeps `j`. A link with both reads `jd`. Copy-as-Markdown
-  gives the three stacks and the reading as text for a doc or a 1:1
+  gives the stacks (and the joy rank or old Joy/Drain line when there is
+  one) and the reading as text for a doc or a 1:1
   agenda. `localStorage` keeps past runs so a user can retake in six
   months and see the diff ("your Strengths stack moved; your Energy
   stack did not").
