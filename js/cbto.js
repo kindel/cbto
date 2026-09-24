@@ -21,7 +21,8 @@
   }
 
   function validJoy(j) {
-    // A joy set is the letters marked joy, in C, B, T, O order.
+    // The old yes/no joy check, still read from old links: the letters
+    // marked joy, in C, B, T, O order. New runs rank joy instead (jd).
     if (typeof j !== "string" || j.length > 4) return false;
     var last = -1;
     for (var i = 0; i < j.length; i++) {
@@ -30,6 +31,20 @@
       last = k;
     }
     return true;
+  }
+
+  function joySeed(j) {
+    // Turn an old yes/no joy set into a starting order for the joy rank:
+    // joy letters first, then drain, each in C, B, T, O order. Only a
+    // starting point for the cards; the reading never treats it as a rank.
+    var joy = "";
+    var drain = "";
+    for (var i = 0; i < 4; i++) {
+      var ch = "CBTO".charAt(i);
+      if (j.indexOf(ch) >= 0) joy += ch;
+      else drain += ch;
+    }
+    return joy + drain;
   }
 
   function rankOf(stack, letter) {
@@ -63,21 +78,38 @@
     return best;
   }
 
-  function signals(s, e, n, j) {
+  function signals(s, e, n, jd, j) {
+    // jd is the joy rank: four letters, most joy first, most drain last.
+    // The top two are the joy end, the bottom two the drain end. j is an
+    // old yes/no answer from an old link; it only flags that the reading
+    // has no joy rank to use.
     var fs = footrule(e, s);
     var fn = footrule(e, n);
     var edge = growthEdge(s, e);
-    return {
+    var sig = {
       superpower: s.charAt(0),
       edge: edge,
       comfort: s === n ? "same" : fs < fn ? "strengths" : fn < fs ? "role" : "even",
       blindSpot: rankOf(s, n.charAt(0)) >= 2 ? n.charAt(0) : null,
       en: overlap(e, n),
       sn: overlap(s, n),
-      joy: j == null ? null : j,
-      edgeDrained: j != null && edge != null && j.indexOf(edge) < 0,
-      superDrained: j != null && j.indexOf(s.charAt(0)) < 0
+      jd: jd == null ? null : jd,
+      legacyJoy: jd == null && j != null ? j : null
     };
+    if (jd != null) {
+      var a = n.charAt(0);
+      var b = n.charAt(1);
+      var top = jd.charAt(0);
+      sig.jn = overlap(jd, n);
+      sig.roleNeeds = [a, b];
+      sig.roleJoy = (rankOf(jd, a) < 2 ? 1 : 0) + (rankOf(jd, b) < 2 ? 1 : 0);
+      sig.edgeJoy = edge == null ? null : rankOf(jd, edge) < 2 ? "joy" : "drain";
+      sig.superDrained = jd.charAt(3) === s.charAt(0);
+      // The work you enjoy most, that the role needs, that you left low in
+      // where you want to grow. Not the growth edge; the reading covers it.
+      sig.untapped = top !== edge && rankOf(n, top) < 2 && rankOf(e, top) >= 2 ? top : null;
+    }
+    return sig;
   }
 
   function fill(template, vars) {
@@ -93,14 +125,21 @@
     else out.push({ key: "growth_edge_none", text: interp.growth_edge_none });
     if (sig.blindSpot) out.push({ key: "blind_spot", text: fill(interp.blind_spot, { lens: names[sig.blindSpot] }) });
     out.push({ key: "comfort_" + sig.comfort, text: interp["comfort_" + sig.comfort] });
-    out.push({ key: "alignment", text: fill(interp.alignment, { en: sig.en, sn: sig.sn }) });
-    if (sig.joy != null) {
-      if (sig.edgeDrained) out.push({ key: "joy_clash", text: fill(interp.joy_clash, { lens: names[sig.edge] }) });
+    if (sig.jd != null) {
+      out.push({ key: "alignment_joy", text: fill(interp.alignment_joy, { en: sig.en, sn: sig.sn, jn: sig.jn }) });
+      var a = sig.roleNeeds[0];
+      var b = sig.roleNeeds[1];
+      var joyOne = sig.jd.indexOf(a) < sig.jd.indexOf(b) ? a : b;
+      var drainOne = joyOne === a ? b : a;
+      out.push({ key: "joy_role_" + sig.roleJoy, text: fill(interp["joy_role_" + sig.roleJoy], {
+        a: names[a], b: names[b], joy: names[joyOne], drain: names[drainOne]
+      }) });
+      if (sig.untapped) out.push({ key: "joy_untapped", text: fill(interp.joy_untapped, { lens: names[sig.untapped] }) });
+      if (sig.edgeJoy) out.push({ key: "joy_edge_" + sig.edgeJoy, text: fill(interp["joy_edge_" + sig.edgeJoy], { lens: names[sig.edge] }) });
       if (sig.superDrained) out.push({ key: "joy_superpower_drain", text: fill(interp.joy_superpower_drain, { lens: names[sig.superpower] }) });
-      if (!sig.edgeDrained && !sig.superDrained) {
-        if (sig.edge != null) out.push({ key: "joy_clear", text: interp.joy_clear });
-        else out.push({ key: "joy_clear_no_edge", text: interp.joy_clear_no_edge });
-      }
+    } else {
+      out.push({ key: "alignment", text: fill(interp.alignment, { en: sig.en, sn: sig.sn }) });
+      if (sig.legacyJoy != null) out.push({ key: "joy_legacy", text: interp.joy_legacy });
     }
     out.push({ key: "closing", text: interp.closing });
     return out;
@@ -108,23 +147,29 @@
 
   function encodeState(st) {
     var q = "?s=" + st.s + "&e=" + st.e + "&n=" + st.n;
-    if (st.j != null) q += "&j=" + st.j;
+    if (st.jd != null) q += "&jd=" + st.jd;
+    else if (st.j != null) q += "&j=" + st.j;
     return q;
   }
 
   function decodeState(qs) {
+    // jd is the joy rank. j is the old yes/no joy set; old links still
+    // load, and a jd in the same link wins.
     var p = new URLSearchParams(qs);
     var s = p.get("s");
     var e = p.get("e");
     var n = p.get("n");
+    var jd = p.get("jd");
     var j = p.get("j");
     if (!validStack(s) || !validStack(e) || !validStack(n)) return null;
-    if (j != null && !validJoy(j)) return null;
-    return { s: s, e: e, n: n, j: j == null ? null : j };
+    if (jd != null && !validStack(jd)) return null;
+    if (jd == null && j != null && !validJoy(j)) return null;
+    return { s: s, e: e, n: n, jd: jd, j: jd == null ? j : null };
   }
 
   function defaultOrders() {
-    return { s: ["C", "B", "T", "O"], e: ["C", "B", "T", "O"], n: ["C", "B", "T", "O"] };
+    var d = ["C", "B", "T", "O"];
+    return { s: d.slice(), e: d.slice(), n: d.slice(), jd: d.slice() };
   }
 
   function applyOrder(letters) {
@@ -146,18 +191,22 @@
   }
 
   function ordersFromState(st) {
+    // The joy cards start from the joy rank, or from an old yes/no answer,
+    // or from the default order.
     if (!st || !validStack(st.s) || !validStack(st.e) || !validStack(st.n)) return null;
-    return { s: st.s.split(""), e: st.e.split(""), n: st.n.split("") };
+    var jd = validStack(st.jd) ? st.jd : st.j != null && validJoy(st.j) ? joySeed(st.j) : "CBTO";
+    return { s: st.s.split(""), e: st.e.split(""), n: st.n.split(""), jd: jd.split("") };
   }
 
-  function stateFromOrders(orders, j) {
+  function stateFromOrders(orders, jd, j) {
     if (!orders) return null;
     var s = orders.s && orders.s.join("");
     var e = orders.e && orders.e.join("");
     var n = orders.n && orders.n.join("");
     if (!validStack(s) || !validStack(e) || !validStack(n)) return null;
-    if (j != null && !validJoy(j)) return null;
-    return { s: s, e: e, n: n, j: j == null ? null : j };
+    if (jd != null && !validStack(jd)) return null;
+    if (jd == null && j != null && !validJoy(j)) return null;
+    return { s: s, e: e, n: n, jd: jd == null ? null : jd, j: jd == null && j != null ? j : null };
   }
 
   function afterRank(idx, editing) {
@@ -167,10 +216,12 @@
     return null;
   }
 
-  function finishState(orders, j, previous) {
-    var keep = j;
-    if (keep == null && previous && previous.j != null) keep = previous.j;
-    return stateFromOrders(orders, keep);
+  function finishState(orders, jd, previous) {
+    // A new joy rank replaces whatever joy the last result had. Without
+    // one, the last result's joy (rank or old yes/no) carries over.
+    if (jd != null) return stateFromOrders(orders, jd, null);
+    if (previous) return stateFromOrders(orders, previous.jd == null ? null : previous.jd, previous.j == null ? null : previous.j);
+    return stateFromOrders(orders, null, null);
   }
   // --- end model -----------------------------------------------------------
 
@@ -182,19 +233,29 @@
       key: "s",
       title: "What are you strongest at today?",
       ask: "Rank all four. Strongest at the top.",
-      hint: "Rank yourself. Not what you enjoy. Not your job title. A name is optional and never required."
+      hint: "Rank yourself. Not what you enjoy. Not your job title. A name is optional and never required.",
+      top: "Strongest at the top."
     },
     {
       key: "e",
       title: "Where do you want to grow the most?",
       ask: "Rank all four. Growth that matters most at the top.",
-      hint: "Think about the roles you want next, not only the job you have now. This stack is your future energy."
+      hint: "Think about the roles you want next, not only the job you have now. This stack is your future energy.",
+      top: "Strongest at the top."
     },
     {
       key: "n",
       title: "What does your current role actually need?",
       ask: "Rank the job, not yourself.",
-      hint: "Rank by importance to the role, the manager, and the team."
+      hint: "Rank by importance to the role, the manager, and the team.",
+      top: "Strongest at the top."
+    },
+    {
+      key: "jd",
+      title: "Joy or drain?",
+      ask: "Rank the work itself: most joy at the top, most drain at the bottom.",
+      hint: "You can be really good at something and still find it soul-sucking. Rank the work, not the outcomes. Or skip to your stacks.",
+      top: "Most joy at the top."
     }
   ];
 
@@ -202,7 +263,6 @@
   var names = {};
   var interp = null;
   var orders = defaultOrders();
-  var joySel = { C: null, B: null, T: null, O: null };
   var heroes = { C: "", B: "", T: "", O: "" };
   var lastResults = null;
 
@@ -240,11 +300,17 @@
       var runs = raw ? JSON.parse(raw) : [];
       if (!Array.isArray(runs)) return [];
       return runs.filter(function (r) {
-        return r && validStack(r.s) && validStack(r.e) && validStack(r.n) && (r.j == null || validJoy(r.j));
+        return r && validStack(r.s) && validStack(r.e) && validStack(r.n) && (r.jd == null || validStack(r.jd)) && (r.j == null || validJoy(r.j));
       });
     } catch (err) {
       return [];
     }
+  }
+
+  function sameRun(a, b) {
+    return a.s === b.s && a.e === b.e && a.n === b.n &&
+      (a.jd == null ? null : a.jd) === (b.jd == null ? null : b.jd) &&
+      (a.j == null ? null : a.j) === (b.j == null ? null : b.j);
   }
 
   function saveRun(st) {
@@ -252,9 +318,12 @@
       var runs = loadRuns();
       var last = runs[runs.length - 1];
       var today = new Date().toISOString().slice(0, 10);
-      var sameStacks = last && last.s === st.s && last.e === st.e && last.n === st.n && (last.j == null ? null : last.j) === st.j;
+      var sameStacks = last && sameRun(last, st);
       if (sameStacks && last.t === today) return runs;
-      runs.push({ t: today, s: st.s, e: st.e, n: st.n, j: st.j });
+      var run = { t: today, s: st.s, e: st.e, n: st.n };
+      if (st.jd != null) run.jd = st.jd;
+      else if (st.j != null) run.j = st.j;
+      runs.push(run);
       if (runs.length > 24) runs = runs.slice(runs.length - 24);
       localStorage.setItem(RUNS_KEY, JSON.stringify(runs));
       return runs;
@@ -269,7 +338,6 @@
 
   function resetWizard() {
     orders = defaultOrders();
-    joySel = { C: null, B: null, T: null, O: null };
     heroes = { C: "", B: "", T: "", O: "" };
     lastResults = null;
     setFlow(false);
@@ -278,12 +346,6 @@
   function adoptState(st) {
     var restored = ordersFromState(st);
     if (restored) orders = restored;
-    joySel = { C: null, B: null, T: null, O: null };
-    if (st && st.j != null) {
-      "CBTO".split("").forEach(function (ch) {
-        joySel[ch] = st.j.indexOf(ch) >= 0 ? "joy" : "drain";
-      });
-    }
     lastResults = st;
   }
 
@@ -341,6 +403,7 @@
   function backLabel(idx) {
     if (idx === 0) return lastResults ? "Back to results" : "Back";
     if (idx === 1) return "Back to strengths";
+    if (idx === 3) return lastResults ? "Back to results" : "Back to role needs";
     return "Back to grow the most";
   }
 
@@ -348,12 +411,13 @@
     var r = RANKS[idx];
     var order = orders[r.key];
     var isStrengths = idx === 0;
-    var html = '<p class="cbto-step">Step ' + (idx + 1) + " of 3</p>" +
-      "<h2>" + esc(r.title) + "</h2>" +
+    var isJoy = idx === 3;
+    var html = (isJoy ? '<p class="cbto-step">Optional. Skip this if you want.</p>' : '<p class="cbto-step">Step ' + (idx + 1) + " of 3</p>") +
+      "<h2>" + (isJoy ? '<a href="' + JOY_DRAIN_URL + '" target="_blank" rel="noopener noreferrer">' + esc(r.title) + "</a>" : esc(r.title)) + "</h2>" +
       '<p class="cbto-ask">' + esc(r.ask) + "</p>" +
       '<p class="cbto-hint">' + esc(r.hint) + "</p>" +
-      '<p class="cbto-how cbto-how-desktop">Drag the cards to rank them. Strongest at the top.</p>' +
-      '<p class="cbto-how cbto-how-mobile">Tap the arrows to rank them. Strongest at the top.</p>' +
+      '<p class="cbto-how cbto-how-desktop">Drag the cards to rank them. ' + esc(r.top) + "</p>" +
+      '<p class="cbto-how cbto-how-mobile">Tap the arrows to rank them. ' + esc(r.top) + "</p>" +
       '<ol class="cbto-rank" id="cbto-rank">';
     for (var i = 0; i < order.length; i++) {
       var l = lensByLetter(order[i]);
@@ -368,11 +432,20 @@
         "</span></li>";
     }
     html += "</ol>";
-    html += '<p class="cbto-persist">Back keeps the order you already set. You do not need to start over.</p>' +
-      '<div class="cbto-actions">' +
-      '<button type="button" class="cbto-btn" id="cbto-back">' + esc(backLabel(idx)) + "</button>" +
-      '<button type="button" class="cbto-btn cbto-btn-primary" id="cbto-next">' + (idx === 2 ? "Continue" : "Next") + "</button>" +
-      "</div>";
+    if (isJoy) {
+      html += '<p class="cbto-persist">' + (lastResults ? "Back to results keeps the reading you had." : "Skip still takes you to results. Back keeps your ranks.") + "</p>" +
+        '<div class="cbto-actions">' +
+        '<button type="button" class="cbto-btn" id="cbto-back">' + esc(backLabel(idx)) + "</button>" +
+        (lastResults ? "" : '<button type="button" class="cbto-btn cbto-btn-primary" id="cbto-skip">Skip to results</button>') +
+        '<button type="button" class="cbto-btn' + (lastResults ? " cbto-btn-primary" : "") + '" id="cbto-next">Include joy in results</button>' +
+        "</div>";
+    } else {
+      html += '<p class="cbto-persist">Back keeps the order you already set. You do not need to start over.</p>' +
+        '<div class="cbto-actions">' +
+        '<button type="button" class="cbto-btn" id="cbto-back">' + esc(backLabel(idx)) + "</button>" +
+        '<button type="button" class="cbto-btn cbto-btn-primary" id="cbto-next">' + (idx === 2 ? "Continue" : "Next") + "</button>" +
+        "</div>";
+    }
     if (isStrengths) html += heroFieldsHtml();
     html += examplesHtml();
     setFlow(true);
@@ -437,70 +510,29 @@
     });
 
     document.getElementById("cbto-back").addEventListener("click", function () {
-      if (idx === 0) {
+      if (idx === 0 || (isJoy && lastResults)) {
         if (lastResults) showResults(lastResults, loadRuns());
         else renderIntro(false);
       } else {
         renderRank(idx - 1);
       }
     });
+    if (isJoy) {
+      var skip = document.getElementById("cbto-skip");
+      if (skip) skip.addEventListener("click", function () { finish(false); });
+      document.getElementById("cbto-next").addEventListener("click", function () { finish(true); });
+      return;
+    }
     document.getElementById("cbto-next").addEventListener("click", function () {
       var dest = afterRank(idx, !!lastResults);
       if (dest === "results") finish(false);
-      else if (dest === "joy") renderJoy();
+      else if (dest === "joy") renderRank(3);
       else if (dest === "continue") renderRank(idx + 1);
     });
   }
 
-  function allJoySet() {
-    return "CBTO".split("").every(function (ch) { return joySel[ch] != null; });
-  }
-
-  function renderJoy() {
-    var html = '<p class="cbto-step">Optional. Skip this if you want.</p>' +
-      '<h2><a href="' + JOY_DRAIN_URL + '" target="_blank" rel="noopener noreferrer">Joy or drain?</a></h2>' +
-      '<p class="cbto-ask">Optional. For each lens: does the work itself bring you joy, or does it drain you?</p>' +
-      '<p class="cbto-hint">The short path skips this. You can be really good at something and still find it soul-sucking. Answer for the work, not the outcomes, or skip to your stacks.</p>' +
-      '<div class="cbto-joy" id="cbto-joy">';
-    lenses.forEach(function (l) {
-      var v = joySel[l.letter];
-      html += '<div class="cbto-joy-row cbto-lens-' + l.letter.toLowerCase() + '" data-letter="' + l.letter + '">' +
-        '<span class="cbto-dot" aria-hidden="true"></span>' +
-        '<span class="cbto-joy-name"><span class="cbto-joy-name-main">' + dropCapName(l.name) + '</span><span class="cbto-joy-piep"> / ' + esc(piep(l)) + '</span></span>' +
-        '<span class="cbto-joy-buttons" role="group" aria-label="' + esc(l.name) + ': joy or drain">' +
-        '<button type="button" class="cbto-joy-btn" data-v="joy" aria-pressed="' + (v === "joy") + '">Joy</button>' +
-        '<button type="button" class="cbto-joy-btn" data-v="drain" aria-pressed="' + (v === "drain") + '">Drain</button>' +
-        "</span></div>";
-    });
-    html += "</div>" +
-      '<p class="cbto-persist">Skip still takes you to results. Back keeps your ranks.</p>' +
-      '<div class="cbto-actions">' +
-      '<button type="button" class="cbto-btn" id="cbto-back">Back to role needs</button>' +
-      '<button type="button" class="cbto-btn cbto-btn-primary" id="cbto-skip">Skip to results</button>' +
-      '<button type="button" class="cbto-btn" id="cbto-finish"' + (allJoySet() ? "" : " disabled") + ">Include joy in results</button>" +
-      "</div>";
-    setFlow(true);
-    root.innerHTML = html;
-    document.getElementById("cbto-joy").addEventListener("click", function (ev) {
-      var btn = ev.target.closest(".cbto-joy-btn");
-      if (!btn) return;
-      joySel[btn.closest(".cbto-joy-row").getAttribute("data-letter")] = btn.getAttribute("data-v");
-      renderJoy();
-    });
-    document.getElementById("cbto-back").addEventListener("click", function () { renderRank(2); });
-    document.getElementById("cbto-skip").addEventListener("click", function () { finish(false); });
-    document.getElementById("cbto-finish").addEventListener("click", function () {
-      if (allJoySet()) finish(true);
-    });
-  }
-
   function finish(withJoy) {
-    var j = null;
-    if (withJoy) {
-      j = "";
-      "CBTO".split("").forEach(function (ch) { if (joySel[ch] === "joy") j += ch; });
-    }
-    var st = finishState(orders, withJoy ? j : null, lastResults);
+    var st = finishState(orders, withJoy ? orders.jd.join("") : null, lastResults);
     if (!st) return;
     showResults(st, saveRun(st));
   }
@@ -511,8 +543,11 @@
       { title: "Grow the most", ask: "Where you want to grow. Future energy.", stack: st.e, edit: 1, mark: sig && sig.edge, markLabel: "Growth edge", compare: false },
       { title: "Role needs", ask: "What the job needs. Compare this last.", stack: st.n, edit: 2, mark: null, markLabel: "", compare: true }
     ];
+    if (st.jd != null) {
+      cols.push({ title: "Joy to drain", ask: "Most joy at the top, most drain at the bottom.", stack: st.jd, edit: 3, mark: null, markLabel: "", compare: false });
+    }
     return '<p class="cbto-cols-lead">Read Superpower and Growth edge first. Role needs is the comparison, not the thing to decode first.</p>' +
-      '<div class="cbto-cols">' + cols.map(function (c) {
+      '<div class="cbto-cols' + (cols.length === 4 ? " cbto-cols-4" : "") + '">' + cols.map(function (c) {
         var lis = "";
         for (var i = 0; i < 4; i++) {
           var ch = c.stack.charAt(i);
@@ -548,10 +583,12 @@
 
   function toMarkdown(st, paras) {
     var lines = ["# CBTO stack rank, " + new Date().toISOString().slice(0, 10), ""];
-    lines.push("| | Strengths today | Grow the most | Role needs |");
-    lines.push("|---|---|---|---|");
+    var withJoy = st.jd != null;
+    lines.push("| | Strengths today | Grow the most | Role needs |" + (withJoy ? " Joy to drain |" : ""));
+    lines.push("|---|---|---|---|" + (withJoy ? "---|" : ""));
     for (var i = 0; i < 4; i++) {
-      lines.push("| " + (i + 1) + " | " + names[st.s.charAt(i)] + " | " + names[st.e.charAt(i)] + " | " + names[st.n.charAt(i)] + " |");
+      lines.push("| " + (i + 1) + " | " + names[st.s.charAt(i)] + " | " + names[st.e.charAt(i)] + " | " + names[st.n.charAt(i)] + " |" +
+        (withJoy ? " " + names[st.jd.charAt(i)] + " |" : ""));
     }
     if (st.j != null) lines.push("", joyLineText(st.j));
     lines.push("");
@@ -569,7 +606,7 @@
     if (!runs || !runs.length) return "";
     var html = "";
     var last = runs[runs.length - 1];
-    var isCurrent = last && last.s === st.s && last.e === st.e && last.n === st.n && (last.j == null ? null : last.j) === st.j;
+    var isCurrent = last && sameRun(last, st);
     var prev = isCurrent ? runs[runs.length - 2] : null;
     if (prev) {
       var bits = [
@@ -577,12 +614,13 @@
         "energy " + (prev.e === st.e ? "unchanged" : "moved"),
         "role needs " + (prev.n === st.n ? "unchanged" : "moved")
       ];
+      if (prev.jd != null && st.jd != null) bits.push("joy " + (prev.jd === st.jd ? "unchanged" : "moved"));
       html += '<p class="cbto-compare">Since your run on ' + esc(prev.t) + ": " + bits.join(", ") + ".</p>";
     }
     if (runs.length > (isCurrent ? 1 : 0)) {
       html += '<details class="cbto-history"><summary>Past runs on this browser</summary><ul>';
       runs.slice().reverse().forEach(function (run) {
-        html += '<li><a href="' + esc(location.pathname + encodeState(run)) + '">' + esc(run.t) + "</a>: S " + esc(run.s) + " · E " + esc(run.e) + " · N " + esc(run.n) + "</li>";
+        html += '<li><a href="' + esc(location.pathname + encodeState(run)) + '">' + esc(run.t) + "</a>: S " + esc(run.s) + " · E " + esc(run.e) + " · N " + esc(run.n) + (run.jd != null ? " · J " + esc(run.jd) : "") + "</li>";
       });
       html += "</ul></details>";
     }
@@ -626,7 +664,7 @@
   function showResults(st, runs) {
     adoptState(st);
     try { history.replaceState(null, "", location.pathname + encodeState(st)); } catch (err) {}
-    var sig = signals(st.s, st.e, st.n, st.j);
+    var sig = signals(st.s, st.e, st.n, st.jd, st.j);
     var paras = buildReading(sig, names, interp);
     var lead = [];
     var rest = [];
@@ -643,9 +681,10 @@
       '<button type="button" class="cbto-btn" id="cbto-copy-md">Copy as Markdown</button>' +
       '<button type="button" class="cbto-btn cbto-btn-quiet" id="cbto-again">Start over</button>' +
       "</div>" +
-      "<h3 class=\"cbto-stacks-head\">The three stacks</h3>" +
+      '<h3 class="cbto-stacks-head">' + (st.jd != null ? "The four stacks" : "The three stacks") + "</h3>" +
       columnsHtml(st, sig) +
       (st.j != null ? '<p class="cbto-joyline">' + joyLineHtml(st.j) + "</p>" : "") +
+      (st.jd == null ? '<div class="cbto-actions"><button type="button" class="cbto-btn" data-edit-rank="3">Rank joy to drain</button></div>' : "") +
       '<div class="cbto-reading">' +
       rest.map(function (p) { return "<p>" + linkJoyDrainPhrase(esc(p.text)) + "</p>"; }).join("") +
       "</div>" +

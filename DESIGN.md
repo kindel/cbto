@@ -90,14 +90,22 @@ instead." Planned for v1.1.
 
 ### 3. Joy or drain (optional, bridge not merge)
 
-One optional screen before results: "For each lens, does this work
-bring you joy or drain you?" Four toggles, ten seconds, skippable. The
-default five-minute path treats this as skippable: Skip to results is
-the primary action, and Skip still reaches results. Answering all four
-toggles and clicking Include joy in results is extra. The full
-Joy/Drain exercise stays in its own post and future app; CBTO only
-surfaces the collision when it exists. The README draws this boundary
-("related, not this app") and this design keeps it.
+One optional screen before results: rank the four lenses from the work
+that brings you the most joy to the work that drains you most. Same
+cards, same drag or tap, same forced rank as the other three stacks.
+The default five-minute path treats this as skippable: Skip to results
+is the primary action, and Skip still reaches results. Ranking and
+clicking Include joy in results is extra. Results without joy offer a
+Rank joy to drain button.
+
+It used to be four yes/no toggles. That let a user mark all four as
+joy, and then it changed nothing (issue #17). A forced rank always has
+a joy end and a drain end, so it always moves the reading.
+
+The full Joy/Drain exercise stays in its own post and future app; CBTO
+only reads the joy rank against the other three stacks. The README
+draws this boundary ("related, not this app") and this design keeps
+it.
 
 ### 4. Results
 
@@ -105,7 +113,8 @@ The reading leads: Superpower and Growth edge first, in plain
 language. Then three columns side by side (Strengths today, Grow the
 most, Role needs) with the four lenses color-coded so the eye tracks
 each lens across the columns. Role needs is the comparison, not the
-first thing to decode. Each column has a Change control that returns
+first thing to decode. With a joy rank, a fourth column (Joy to drain)
+sits after Role needs. Each column has a Change control that returns
 to that rank and keeps the other stacks. Next from that rank returns
 to results and keeps any joy already on the result. It does not walk
 Joy again unless the user opens that screen and re-answers. Share sits
@@ -122,10 +131,20 @@ The reading, generated from rules (see Interpretation):
 - **Alignment**: a plain-language distance between stacks ("Your energy
   matches the role's needs in 1 of 4 positions"), never a bare score.
 
-If the user answered the joy check and the growth edge lands on a lens
-marked as drain, the reading says so: "You plan to grow where the work
-drains you; read Joy vs Drain before you commit," and links the 2025
-Joy vs Drain post.
+If the user ranked joy, the reading adds (see the joy rows under
+Interpretation):
+
+- **Joy against the role**: whether the two lenses the role needs most
+  sit on the joy end of the rank (the top two), the drain end (the
+  bottom two), or one on each. The advice changes with it: protect a
+  job that feeds you; staff around one that drains you; spend your best
+  hours on the joy one and get help on the drain one.
+- **Untapped joy**: the lens you enjoy most, that the role needs, that
+  you ranked low in Grow the most. That is the easiest growth you have.
+- **Growth edge on the joy rank**: joy end or drain end. The drain end
+  links the 2025 Joy vs Drain post.
+- **Drained superpower**: your superpower is your most draining work.
+- **Alignment** adds your joy rank's positions in common with the role.
 
 The reading closes on the post's counterweight: development is not only
 patching weakness; it is aligning growth with work that is fun, future
@@ -143,11 +162,17 @@ from the three permutations:
 | Comfort zone | Energy closer to Strengths than to Role (footrule distance) |
 | Blind spot | Role rank 1 with Strengths rank 3–4 |
 | Alignment | per-pair footrule distance, rendered as positions-in-common |
+| Joy against the role | how many of Role ranks 1 and 2 sit in Joy ranks 1 and 2: 2, 1, or 0 |
+| Untapped joy | Joy rank 1 is Role rank 1 or 2, Energy rank 3 or 4, and not the growth edge |
+| Growth edge joy | growth edge in Joy ranks 1 and 2 (joy end) or 3 and 4 (drain end) |
+| Drained superpower | Strengths rank 1 is Joy rank 4 |
+| Joy alignment | positions in common between Joy and Role |
 
 Every signal renders through template text in `data/interpretations.json`.
-With 24 orderings per stack there are 13,824 combinations; the templates
-key on signals, not on raw orderings, so the text stays finite and every
-combination resolves. A check enforces that (see Checks).
+With 24 orderings per stack there are 13,824 combinations of the three
+stacks, and 331,776 with a joy rank; the templates key on signals, not
+on raw orderings, so the text stays finite and every combination
+resolves. A check enforces that (see Checks).
 
 **Archetype names are out for v1.** Naming orderings ("the Builder",
 "the Operator") makes results shareable and makes them horoscopes.
@@ -186,11 +211,20 @@ icon.png              already present
 ```
 
 - **State and sharing.** The three stacks (plus the optional joy
-  toggles) encode into the URL as human-readable query parameters:
-  `?s=CBTO&e=TOBC&n=BCOT&j=CT`. Each stack is four letters in rank
-  order; `j` holds the letters marked as joy (omitted when skipped).
-  A permalink reproduces the results screen exactly. Copy-as-Markdown
-  gives the three stacks and the reading as text for a doc or a 1:1
+  rank) encode into the URL as human-readable query parameters:
+  `?s=CBTO&e=TOBC&n=BCOT&jd=OTCB`. Each stack is four letters in rank
+  order; `jd` is the joy rank, most joy first (omitted when skipped).
+  A permalink reproduces the results screen exactly.
+- **Old joy links.** Before the joy rank, `j` held the letters marked
+  joy on the yes/no check (`j=CT`, or `j=CBTO` for all four). It gets
+  a new name because `j=CBTO` is also a valid rank and would change
+  meaning. Old links still load: the stacks read as before, the old
+  answer shows as a Joy/Drain line, and the reading asks for a joy
+  rank instead of guessing one. Rank joy to drain starts the cards
+  from the old answer (joy letters first). Ranking replaces `j` with
+  `jd`; editing a stack keeps `j`. A link with both reads `jd`. Copy-as-Markdown
+  gives the stacks (and the joy rank or old Joy/Drain line when there is
+  one) and the reading as text for a doc or a 1:1
   agenda. `localStorage` keeps past runs so a user can retake in six
   months and see the diff ("your Strengths stack moved; your Energy
   stack did not").
@@ -209,10 +243,14 @@ icon.png              already present
 Per the tenets, each rule ships with the check that fails on it, in
 `scripts/check_reading.js`, run by CI:
 
-1. Every one of the 13,824 stack combinations produces a complete
-   reading; no signal resolves to a missing template.
+1. Every input combination produces a complete reading; no signal
+   resolves to a missing template. That is all 13,824 stack
+   combinations with no joy, with each of the 24 joy ranks, and with
+   each of the 16 old yes/no joy sets. Each joy rule is checked
+   against its definition, and a joy rank that matches the role must
+   read differently from one that runs against it.
 2. Permalinks round-trip: encode(decode(x)) is identity across all
-   combinations.
+   those combinations, old `j` links included.
 3. The signal functions are lifted from `js/cbto.js`, not restated, so
    the check cannot fall out of step with what the page runs (biq's
    `check_search.js` pattern).
@@ -239,8 +277,8 @@ Per the tenets, each rule ships with the check that fails on it, in
 
 ## Open questions
 
-1. Does the joy check belong in v1, or does even four toggles blur the
-   line the README draws against the Joy/Drain post?
+1. Does the joy rank belong in v1, or does even one optional rank blur
+   the line the README draws against the Joy/Drain post?
 2. Forced-pairs: worth the extra screen real estate in v1, or is
    drag-to-rank plus good example activities honest enough?
 3. Team view assumes people will share permalinks with a facilitator.
