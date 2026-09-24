@@ -568,6 +568,15 @@ h1, h2, h3 {
   margin: 0.2rem 0;
 }
 
+.cbto-saved {
+  margin: 0.75rem 0 0;
+  color: var(--cbto-muted);
+}
+
+.cbto-saved .cbto-btn {
+  margin-left: 0.35rem;
+}
+
 .cbto-footer {
   max-width: 820px;
   margin: 0 auto;

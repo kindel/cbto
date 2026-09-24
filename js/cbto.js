@@ -624,7 +624,13 @@
       });
       html += "</ul></details>";
     }
+    html += '<p class="cbto-saved">Runs are saved in this browser only. ' +
+      '<button type="button" class="cbto-btn" id="cbto-clear-runs">Clear saved runs</button></p>';
     return html;
+  }
+
+  function clearRuns() {
+    try { localStorage.removeItem(RUNS_KEY); } catch (err) {}
   }
 
   function copyText(text, btn) {
@@ -703,6 +709,12 @@
         adoptState(st);
         renderRank(Number(btn.getAttribute("data-edit-rank")));
       });
+    });
+    var clearBtn = document.getElementById("cbto-clear-runs");
+    if (clearBtn) clearBtn.addEventListener("click", function () {
+      if (!window.confirm("Clear every run saved in this browser? This cannot be undone.")) return;
+      clearRuns();
+      showResults(st, []);
     });
     document.getElementById("cbto-again").addEventListener("click", function () {
       try { history.replaceState(null, "", location.pathname); } catch (err) {}
