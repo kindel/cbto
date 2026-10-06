@@ -16,7 +16,7 @@ things, stated in plain language on one results screen:
    Current Strengths ranks low, where intentional growth pays off.
 3. **The match, or the mismatch.** Whether their energy is going where
    the role actually needs it, or to what they are already good at.
-   The 2025 post's core claim (most leaders default to their existing
+   The 2025 essay's core claim (most leaders default to their existing
    strengths) is the thing the results screen makes undeniable.
 
 Secondary outcomes: an artifact they can bring to a manager, mentor, or
@@ -51,12 +51,12 @@ lens for this card title; hosts who override `window.CBTO.lenses` can
 change it. When `piep` is missing, the card falls back to the first
 alias.
 
-A user who arrives from the blog already knows the model; the wizard
+A user who arrives from an essay already knows the model; the wizard
 opens with "Learn the lenses" and "Start the rank" side by side.
 
 ### 2. Rank, three times
 
-The three questions from the 2025 post, one screen each:
+The three questions from the 2025 essay, one screen each:
 
 1. **Current Strengths**: what you are strongest at today. Ranking
    the four cards is the first action. An optional, collapsed field
@@ -102,7 +102,7 @@ It used to be four yes/no toggles. That let a user mark all four as
 joy, and then it changed nothing (issue #17). A forced rank always has
 a joy end and a drain end, so it always moves the reading.
 
-The full Joy/Drain exercise stays in its own post and future app; CBTO
+The full Joy/Drain exercise stays in its own essay and future app; CBTO
 only reads the joy rank against the other three stacks. The README
 draws this boundary ("related, not this app") and this design keeps
 it.
@@ -142,11 +142,11 @@ Interpretation):
 - **Untapped joy**: the lens you enjoy most, that the role needs, that
   you ranked low in Grow the most. That is the easiest growth you have.
 - **Growth edge on the joy rank**: joy end or drain end. The drain end
-  links the 2025 Joy vs Drain post.
+  links the 2025 Joy vs Drain essay.
 - **Drained superpower**: your superpower is your most draining work.
 - **Alignment** adds your joy rank's positions in common with the role.
 
-The reading closes on the post's counterweight: development is not only
+The reading closes on the essay's counterweight: development is not only
 patching weakness; it is aligning growth with work that is fun, future
 roles, team needs, and market demands.
 
@@ -278,7 +278,7 @@ Per the tenets, each rule ships with the check that fails on it, in
 ## Open questions
 
 1. Does the joy rank belong in v1, or does even one optional rank blur
-   the line the README draws against the Joy/Drain post?
+   the line the README draws against the Joy/Drain essay?
 2. Forced-pairs: worth the extra screen real estate in v1, or is
    drag-to-rank plus good example activities honest enough?
 3. Team view assumes people will share permalinks with a facilitator.
