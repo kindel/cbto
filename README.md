@@ -68,7 +68,7 @@ Live at https://kindel.com/kld/apps/cbto/.
 
 ## Teaching
 
-The model and the exercise are explained in these posts:
+The model and the exercise are explained in these essays:
 
 - [Customer, Business, Technology, Organization (CBTO)](https://blog.kindel.com/2018/04/21/customer-business-technology-organization-cbto/) (2018 primer)
 - [Your Leadership Priorities Are Probably Backwards (And How to Fix Them)](https://blog.kindel.com/2025/05/08/your-leadership-priorities-are-probably-backwards-and-how-to-fix-them/) (2025 stack rank exercise)
