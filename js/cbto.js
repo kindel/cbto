@@ -3,7 +3,7 @@
   var lensesUrl = cfg.lenses || "data/lenses.json";
   var interpUrl = cfg.interpretations || "data/interpretations.json";
   var RUNS_KEY = "cbto-runs";
-  var JOY_DRAIN_URL = "https://blog.kindel.com/2025/02/05/stop-answering-the-wrong-question-unlock-your-true-work-happiness/";
+  var JOY_DRAIN_URL = "https://kindel.com/essays/stop-answering-the-wrong-question-unlock-your-true-work-happiness/";
 
   // --- model ---------------------------------------------------------------
   // Pure functions, no DOM. scripts/check_reading.js lifts these by name and
