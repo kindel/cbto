@@ -70,13 +70,13 @@ Live at https://kindel.com/kld/apps/cbto/.
 
 The model and the exercise are explained in these essays:
 
-- [Customer, Business, Technology, Organization (CBTO)](https://blog.kindel.com/2018/04/21/customer-business-technology-organization-cbto/) (2018 primer)
-- [Your Leadership Priorities Are Probably Backwards (And How to Fix Them)](https://blog.kindel.com/2025/05/08/your-leadership-priorities-are-probably-backwards-and-how-to-fix-them/) (2025 stack rank exercise)
+- [Customer, Business, Technology, Organization (CBTO)](https://kindel.com/essays/customer-business-technology-organization-cbto/) (2018 primer)
+- [Your Leadership Priorities Are Probably Backwards (And How to Fix Them)](https://kindel.com/essays/your-leadership-priorities-are-probably-backwards-and-how-to-fix-them/) (2025 stack rank exercise)
 
 ## Related
 
-- [Stop Answering the Wrong Question: Unlock Your True Work Happiness](https://blog.kindel.com/2025/02/05/stop-answering-the-wrong-question-unlock-your-true-work-happiness/) (Joy vs Drain; related, not this app)
-- [Mental Models](https://blog.kindel.com/2019/06/22/mental-models/)
+- [Stop Answering the Wrong Question: Unlock Your True Work Happiness](https://kindel.com/essays/stop-answering-the-wrong-question-unlock-your-true-work-happiness/) (Joy vs Drain; related, not this app)
+- [Mental Models](https://kindel.com/essays/mental-models/)
 - [Office Hours](https://kindel.com/officehours/)
 
 ## License
